@@ -1,6 +1,6 @@
-package Server.DAO;
+package Server.dao;
 
-import Server.Entity.User;
+import Server.entity.User;
 
 public class UserDAO {
     private static final GenericDAO<User> genericDAO = new GenericDAO<>(rs -> 

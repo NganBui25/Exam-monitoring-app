@@ -1,4 +1,4 @@
-package Server.common.Util;
+package Server.Utils;
 
 import java.io.File;
 import java.io.FileWriter;
