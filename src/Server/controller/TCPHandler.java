@@ -17,17 +17,17 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import pbl4.Server.Constant;
-import pbl4.Server.Server;
-import pbl4.Server.DAO.ParticipantDAO;
-import pbl4.Server.DAO.TestDAO;
-import pbl4.Server.DAO.UsersDAO;
-import pbl4.Server.DTO.ClientModel;
-import pbl4.Server.DTO.Room;
-import pbl4.Server.Entity.Participant;
-import pbl4.Server.Entity.Test;
-import pbl4.Server.Entity.User;
-import pbl4.Server.Utils.Service;
+import Server.Constant;
+
+import Server.dao.ParticipantDAO;
+import Server.dao.TestDAO;
+import Server.dao.UserDAO;
+import Server.dto.ClientModel;
+import Server.dto.Room;
+import Server.entity.Participant;
+import Server.entity.Test;
+import Server.entity.User;
+import Server.Utils.Service;
 
 
 public class TCPHandler implements Runnable {
@@ -107,13 +107,13 @@ public class TCPHandler implements Runnable {
 				checkStudent(message, output);
 				break;
 
-			case 'E':
+		/*	case 'E':
 				handleListTestRequest(message, output);
 				break;
 
 			case 'P':
 				handleListParticipant(message, output);
-				break;
+				break;*/
 
 			case 'L': // login : "L,username,password"
 				handleLogin(message, output);
@@ -126,7 +126,7 @@ public class TCPHandler implements Runnable {
 			case 'U': // user update
 				handleUpdateUserRequest(message);
 				break;
-
+/*
 			case 'K': // Lay file ban phim cua participant ve cho teacher xem
 				getKeys(message.substring(1), output);
 				break;
@@ -138,7 +138,7 @@ public class TCPHandler implements Runnable {
 			case 'V': // luu video
 				saveVideo(message, input);
 
-				break;
+				break;*/
 			default:
 				break;
 			}
@@ -202,9 +202,6 @@ public class TCPHandler implements Runnable {
 		else
 			room.setFocusAddress(id);
 	}
-
-
-	
 
 	private boolean texting(String msg) throws UnsupportedEncodingException {
 
@@ -337,14 +334,14 @@ public class TCPHandler implements Runnable {
 
 	private void handleUpdateUserRequest(String msg) {
 		String splitMsg[] = msg.split(",");
-		UsersDAO.updatePassword(splitMsg[1], splitMsg[2]);
+		UserDAO.updatePassword(splitMsg[1], splitMsg[2]);
 	}
 
 	private void handleLogin(String msg, DataOutputStream dos) throws IOException {
 		String splitMsg[] = msg.split(",");
 		String username = splitMsg[1];
 		String password = splitMsg[2];
-		User user = UsersDAO.login(username, password);
+		User user = UserDAO.login(username, password);
 		if (user != null) {
 			dos.writeUTF("Y," + user.getId());
 		} else {
@@ -356,7 +353,7 @@ public class TCPHandler implements Runnable {
 		String splitMsg[] = msg.split(",");
 		String username = splitMsg[1];
 		String password = splitMsg[2];
-		int user_id = UsersDAO.register(username, password);
+		int user_id = UserDAO.register(username, password);
 		if (user_id != -1) {
 			dos.writeUTF("Y," + user_id);
 		} else {
@@ -365,7 +362,7 @@ public class TCPHandler implements Runnable {
 	}
 
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+/*
 	private void handleListTestRequest(String msg, DataOutputStream dos) throws IOException {
 		String[] splitMsg = msg.split(",");
 		String user_id = splitMsg[1];
@@ -446,4 +443,5 @@ public class TCPHandler implements Runnable {
 			}
 		}
 	}
+	*/
 }

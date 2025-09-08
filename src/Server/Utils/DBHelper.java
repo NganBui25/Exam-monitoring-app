@@ -10,7 +10,7 @@ public class DBHelper {
 	private final String dbName = "PBL4LN";
 	private final String userID = "root";
 	private final String password = "113Duongvanan@";
-	private final String url = "jdbc:mysql://localhost:3306/" + dbName;
+	private final String url = "jdbc:mysql://localhost:3306/" + dbName + "?useSSL=false";
 	private Connection conn;
 	private PreparedStatement ps;
 	private static DBHelper _Instance;

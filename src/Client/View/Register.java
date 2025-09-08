@@ -1,5 +1,5 @@
-package Client.View;
-import Server.DAO.UserDAO;
+package Client.view;
+import Server.dao.UserDAO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;

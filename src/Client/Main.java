@@ -1,5 +1,5 @@
 package Client;
-import Client.View.Home;
+import Client.view.Home;
 
 public class Main {
 

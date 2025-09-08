@@ -6,11 +6,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/ADMIN/Documents/Zalo Received Files/mysql-connector-j-9.3.0/mysql-connector-j-9.3.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/ADMIN/Downloads/jnativehook-2.2.2.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="src/lib/mysql-connector-java.jar"/>
+	<classpathentry kind="lib" path="src/lib/jnativehook-2.2.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
