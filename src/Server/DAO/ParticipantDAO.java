@@ -1,6 +1,7 @@
 package Server.DAO;
 import java.util.List;
-import Server.Entity.*;
+
+import Server.Entity.Participant;
 
 public class ParticipantDAO {
     private static final GenericDAO<Participant> genericDAO = new GenericDAO<>(rs -> 

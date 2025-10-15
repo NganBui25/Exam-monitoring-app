@@ -3,9 +3,9 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import Server.common.Util.DBHelper;
-import Server.common.Util.RowMapper;
-//Tái sử dụng CRUD
+import Server.Utils.DBHelper;
+import Server.Utils.RowMapper;
+
 public class GenericDAO<T> {
 	private final RowMapper<T> rowMapper;
 
