@@ -1,8 +1,8 @@
-package Server.dao;
+package Server.DAO;
 import java.time.LocalDate;
 import java.util.List;
 
-import Server.entity.Test;
+import Server.Entity.Test;
 
 public class TestDAO {
     private static final GenericDAO<Test> genericDAO = new GenericDAO<>(rs -> 

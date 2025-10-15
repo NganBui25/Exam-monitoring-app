@@ -9,7 +9,7 @@ import java.sql.Statement;
 public class DBHelper {
 	private final String dbName = "PBL4LN";
 	private final String userID = "root";
-	private final String password = "113Duongvanan@";
+	private final String password = "123456789";
 	private final String url = "jdbc:mysql://localhost:3306/" + dbName;
 	private Connection conn;
 	private PreparedStatement ps;
