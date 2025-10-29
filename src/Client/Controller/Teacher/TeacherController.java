@@ -1,5 +1,6 @@
 package Client.Controller.Teacher;
 
+import java.awt.image.BufferedImage;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -24,7 +25,10 @@ public class TeacherController extends InContestBaseController{
 	public ArrayList<ImageModel> viewList = new ArrayList<>();
 	public TeacherInContest view;
 	public DashboardController dashboardController;
-		
+	
+	public Map<Integer, BufferedImage> studentCanvases = new ConcurrentHashMap<>();
+	
+	public Queue<Packet> deltaQueue = new ConcurrentLinkedQueue<>();
 	public TeacherController(DashboardController dashboardController, String name, String roomId, DatagramSocket udpSocket) {
 		super();
 		this.dashboardController = dashboardController;
@@ -57,9 +61,9 @@ public class TeacherController extends InContestBaseController{
 		}
 	}
 	
-	public void setImage(byte[] img, int cameraNum) {
-		view.setImage(img, cameraNum);
-	}
+//	public void setImage(byte[] img, int cameraNum) {
+//		view.setImage(img, cameraNum);
+//	}
 	
 	public void addStudent(int studentNum, String name) {
 		view.addStudent(studentNum, name);

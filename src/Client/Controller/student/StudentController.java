@@ -1,7 +1,7 @@
 package Client.Controller.student;
 
 import java.awt.image.BufferedImage;
-
+import java.nio.ByteBuffer;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -14,13 +14,18 @@ import Client.View.Home;
 import Client.View.StudentlnContest;
 import Client.Controller.*;
 import Client.commom.DTO.InContest.ScreenImageDTO;
+import java.util.concurrent.locks.Lock; 
+import java.util.concurrent.locks.ReentrantLock;
 
 public class StudentController extends InContestBaseController {
 	 public StudentlnContest view;
 	 public ScreenImageDTO imgModel = new ScreenImageDTO(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
 	 public Queue<BufferedImage> screenQueue = new ConcurrentLinkedQueue<>();
 	 public String currKeys = "";
-	
+	 
+	 public BufferedImage previousImage = null;
+	 public long lastKeyframeTime = 0;
+	 public final Lock imgModelLock = new ReentrantLock();
 	 public StudentController() {
 	     try {
 	         udpSocket = new DatagramSocket();
