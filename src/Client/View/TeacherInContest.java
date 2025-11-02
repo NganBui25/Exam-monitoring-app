@@ -8,7 +8,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+// Import các thư viện Map
+import java.util.HashMap; 
+import java.util.Map; 
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,27 +22,30 @@ import javax.swing.border.LineBorder;
 import Client.Controller.Teacher.TeacherController;
 import Client.View.Utils.ChatPanel;
 import Client.View.Utils.LogPanel;
-
-// Import Panel "thông minh" mà chúng ta đã tạo
-import Client.View.StudentDisplayPanel; 
+import Client.View.StudentDisplayPanel; // Import Panel "thông minh"
 
 public class TeacherInContest extends JFrame {
 
     public TeacherController controller;
     
-    // Đã đổi sang Panel "thông minh"
-    public ArrayList<StudentDisplayPanel> cameraScreens = new ArrayList<>();
+    // === SỬA LỖI: Dùng Map thay vì ArrayList ===
+    // Key: finalSlotNum (0, 1, 2, 3...), Value: Panel hiển thị
+    public Map<Integer, StudentDisplayPanel> cameraScreens = new HashMap<>();
     
-    public JPanel cameras;
+    // Lưu tên sinh viên (Key: studentNum gốc 0, 1, 2...)
+    public Map<Integer, String> studentNames = new HashMap<>();
+
+
+    public JPanel cameras; // Panel chứa tất cả các StudentDisplayPanel
     public ChatPanel chatPn;
     public LogPanel keyPn;
 
     public TeacherInContest(TeacherController controller) {
-        // ... (Toàn bộ code constructor của bạn giữ nguyên) ...
-		this.controller = controller;
-		setLayout(new BorderLayout());
+        this.controller = controller;
+        setLayout(new BorderLayout());
 
-		JPanel topPn = new JPanel(new FlowLayout());
+        // --- Phần setup giao diện (giữ nguyên) ---
+        JPanel topPn = new JPanel(new FlowLayout());
 		topPn.add(new JLabel("Contest Name:" + controller.name));
 		topPn.add(new JLabel("Room ID:" + controller.roomId));
 
@@ -63,7 +68,8 @@ public class TeacherInContest extends JFrame {
 		ketthuc.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//controller.endStream();
+				// Sửa lại: Nên gọi hàm endStream của controller
+				 controller.endStream();
 			}
 		});
 
@@ -71,84 +77,136 @@ public class TeacherInContest extends JFrame {
 		add(mainPn, BorderLayout.CENTER);
 		add(topPn, BorderLayout.NORTH);
 		add(rightPn, BorderLayout.EAST);
+        // --- Kết thúc setup giao diện ---
 
-		setExtendedState(JFrame.MAXIMIZED_BOTH);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setVisible(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        // Sửa lại: Dùng DISPOSE_ON_CLOSE để không tắt cả chương trình
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
+        setVisible(true);
     }
 
     /**
-     * === HÀM ĐÃ SỬA (THÊM revalidate) ===
-     * Hàm này được gọi khi cần thêm 1 slot camera mới
+     * Hàm helper: Tạo và thêm một Panel mới vào giao diện.
+     * Trả về Panel vừa tạo.
      */
-    public void addCameraScreen() {
-        StudentDisplayPanel cameraScreen = new StudentDisplayPanel(); 
+    private StudentDisplayPanel createAndAddCameraScreen(int finalSlotNum) {
+        StudentDisplayPanel cameraScreen = new StudentDisplayPanel();
         cameraScreen.setBorder(new LineBorder(Color.BLACK, 1));
 
-        cameraScreens.add(cameraScreen);
+        // Lưu panel vào Map
+        cameraScreens.put(finalSlotNum, cameraScreen);
+        // Thêm panel vào JPanel chính
         cameras.add(cameraScreen);
+
+        // Thêm listener để focus
         cameraScreen.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                controller.focus(cameraScreens.indexOf(cameraScreen));
+                // Gửi finalSlotNum (0, 1, 2...) khi focus
+                controller.focus(finalSlotNum); 
             }
         });
-        
-        // === THÊM 2 DÒNG NÀY ===
-        // Báo cho layout manager tính toán lại kích thước
+
+        // Cập nhật giao diện (quan trọng)
         cameras.revalidate();
-        // Yêu cầu Swing vẽ lại panel 'cameras'
+        cameras.repaint();
+        return cameraScreen;
+    }
+
+
+    /**
+     * === HÀM ĐÃ SỬA (DÙNG MAP) ===
+     * Hàm này được gọi bởi ViewThread khi có KEYFRAME.
+     */
+    public void updateKeyframeForStudent(int finalSlotNum, byte[] keyframeData) {
+        // computeIfAbsent: Lấy panel, nếu chưa có (lần đầu tiên) 
+        // thì GỌI HÀM 'createAndAddCameraScreen' để TẠO MỚI.
+        // Đây là hàm "an toàn" (thread-safe)
+        StudentDisplayPanel panel = cameraScreens.computeIfAbsent(finalSlotNum, k -> createAndAddCameraScreen(k));
+        
+        // Cập nhật ảnh
+        panel.updateKeyframe(keyframeData);
+    }
+
+    /**
+     * === HÀM ĐÃ SỬA (DÙNG MAP) ===
+     * Hàm này được gọi bởi ViewThread khi có DELTA-FRAME (ô).
+     */
+    public void drawDeltaTileForStudent(int finalSlotNum, byte[] tileData, int x, int y) {
+        // Lấy panel từ Map
+        StudentDisplayPanel panel = cameraScreens.get(finalSlotNum);
+        
+        // Chỉ vẽ nếu panel đã tồn tại (đã nhận Keyframe đầu tiên)
+        if (panel != null) {
+            panel.drawDeltaTile(tileData, x, y);
+        }
+    }
+
+    /**
+     * === HÀM ĐÃ SỬA: Tạo cả 2 slot và lưu tên ===
+     * Hàm này được gọi khi có sinh viên mới (TCP).
+     * studentNum ở đây là ID gốc (0, 1, 2...).
+     */
+    public void addStudent(int studentNum, String name) {
+        // Tính toán 2 slot cho sinh viên này
+        int screenSlot = studentNum * 2; // Ví dụ: 0
+        int camSlot = studentNum * 2 + 1;    // Ví dụ: 1
+
+        // "Khởi động" 2 slot này (để tạo panel rỗng trước)
+        cameraScreens.computeIfAbsent(screenSlot, k -> createAndAddCameraScreen(k));
+        cameraScreens.computeIfAbsent(camSlot, k -> createAndAddCameraScreen(k));
+
+        // Lưu tên sinh viên để hiển thị keylog
+        studentNames.put(studentNum, name);
+
+        // Cập nhật lại giao diện một lần cuối
+        cameras.revalidate();
         cameras.repaint();
     }
 
-    public void removeCameraScreen(int studentNum) {
-        cameras.remove(cameraScreens.get(studentNum));
-        // Cũng cần revalidate khi xóa
-        cameras.revalidate();
-        cameras.repaint();
-    }
-    
-    // 2 hàm mới (cho Keyframe và Delta) - Giữ nguyên
-    public void updateKeyframeForStudent(int studentNum, byte[] keyframeData) {
-        while(studentNum >= cameraScreens.size()) addCameraScreen();
-        cameraScreens.get(studentNum).updateKeyframe(keyframeData);
-    }
-    
-    public void drawDeltaTileForStudent(int studentNum, byte[] tileData, int x, int y) {
-        if(studentNum < cameraScreens.size()) {
-            cameraScreens.get(studentNum).drawDeltaTile(tileData, x, y);
-        }
-    }
-    
     /**
-     * === HÀM ĐÃ SỬA (Sửa lỗi logic *2 + 1) ===
-     * Giờ đây 1 sinh viên (TCP) chỉ add 1 panel (vì chúng ta chỉ có 1 stream UDP)
-     */
-    public void addStudent(int studentNum, String name) {
-        // Đảm bảo slot cho sinh viên này tồn tại
-        while (studentNum >= cameraScreens.size())
-            addCameraScreen();
-        
-        // (Tạm thời chúng ta không hiển thị tên, vì Panel không có setText)
-        // (Bạn có thể tạo 1 class "StudentSlot" chứa cả Panel và JLabel tên sau)
-    }
-    
-    /**
-     * === HÀM ĐÃ SỬA (Sửa lỗi logic *2) ===
-     * Xóa 1 sinh viên (TCP) là xóa 1 panel
+     * === HÀM ĐÃ SỬA: Xóa cả 2 slot ===
+     * studentNum ở đây là ID gốc (0, 1, 2...).
      */
     public void deleteStudent(int studentNum) {
-        if (studentNum < cameraScreens.size()) {
-            removeCameraScreen(studentNum);
+        int screenSlot = studentNum * 2;
+        int camSlot = studentNum * 2 + 1;
+
+        // Lấy panel từ Map
+        StudentDisplayPanel screenPanel = cameraScreens.get(screenSlot);
+        StudentDisplayPanel camPanel = cameraScreens.get(camSlot);
+
+        // Xóa khỏi JPanel chính
+        if (screenPanel != null) {
+            cameras.remove(screenPanel);
+            cameraScreens.remove(screenSlot); // Xóa khỏi Map
+        }
+        if (camPanel != null) {
+            cameras.remove(camPanel);
+            cameraScreens.remove(camSlot); // Xóa khỏi Map
+        }
+
+        // Xóa tên sinh viên
+        studentNames.remove(studentNum);
+
+        // Cập nhật giao diện
+        if (screenPanel != null || camPanel != null) {
+            cameras.revalidate();
+            cameras.repaint();
         }
     }
-    
+
+    // Hàm thêm chat (Giữ nguyên)
     public void addText(String txt) {
         chatPn.addText(txt);
     }
-    
+
+    /**
+     * === HÀM ĐÃ SỬA: Lấy tên từ Map ===
+     */
     public void addKeyLog(int studentNum, String duration, String keys) {
-        // Sửa lại logic lấy tên (vì không còn .getText())
-        String msg = duration + ": " + studentNum + ". " + " (Student) " + " has typed: " + keys;
+        // Lấy tên sinh viên từ Map (dùng ID gốc)
+        String name = studentNames.getOrDefault(studentNum, "(Student)");
+        String msg = duration + ": " + studentNum + ". " + name + " has typed: " + keys;
         keyPn.addText(msg);
     }
 }

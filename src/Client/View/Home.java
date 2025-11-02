@@ -1,5 +1,7 @@
 package Client.View;
 
+import org.opencv.core.Core;
+
 import Client.Controller.student.StudentController;
 
 //import Client.controller.student.StudentController;
@@ -9,7 +11,6 @@ public class Home extends javax.swing.JFrame {
 	public Home() {
 		initComponents();
 	}
-
 	/**
 	 * This method is called from within the constructor to initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is always
@@ -87,6 +88,7 @@ public class Home extends javax.swing.JFrame {
 		 * look and feel. For details see
 		 * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
 		 */
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		try {
 			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {

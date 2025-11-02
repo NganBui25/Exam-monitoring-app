@@ -22,9 +22,12 @@ public class StudentController extends InContestBaseController {
 	 public ScreenImageDTO imgModel = new ScreenImageDTO(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
 	 public Queue<BufferedImage> screenQueue = new ConcurrentLinkedQueue<>();
 	 public String currKeys = "";
+	 public Queue<BufferedImage> camQueue = new ConcurrentLinkedQueue<>();
 	 
 	 public BufferedImage previousImage = null;
 	 public long lastKeyframeTime = 0;
+	 public BufferedImage previousCamImage = null;
+	 public long lastCamKeyframeTime = 0;
 	 public final Lock imgModelLock = new ReentrantLock();
 	 public StudentController() {
 	     try {
@@ -59,7 +62,9 @@ public class StudentController extends InContestBaseController {
 	
 	 public void startThreads() {
 	     new CaptureThread(this,true).start();
+//	     new CaptureThread(this, false).start();
 	     new SendThread(this, true).start();
+//	     new SendThread(this, false).start();
 	     new LiveThread(this).start();
 	 }
 	
