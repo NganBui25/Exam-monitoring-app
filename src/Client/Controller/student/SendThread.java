@@ -30,7 +30,7 @@ public class SendThread extends Thread {
 	// FPS cho luồng gửi (Thống nhất 10 FPS cho cả hai)
 	private static final int SEND_FPS = 10;
 	private static final long FRAME_PERIOD = 1000 / SEND_FPS;
-	private static final int DELTA_THRESHOLD = 0; // Giảm xuống 10 (như đã thống nhất)
+	private static final int DELTA_THRESHOLD = 10; // Giảm xuống 10 (như đã thống nhất)
 
 	public SendThread(StudentController par, boolean isScreen) {
 		this.par = par;
