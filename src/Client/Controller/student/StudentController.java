@@ -1,7 +1,7 @@
 package Client.Controller.student;
 
 import java.awt.image.BufferedImage;
-
+import org.opencv.core.Core;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,6 +9,10 @@ import java.net.DatagramSocket;
 import java.net.Socket;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+
 import Client.Constant;
 import Client.View.Home;
 import Client.View.StudentlnContest;
@@ -19,6 +23,10 @@ public class StudentController extends InContestBaseController {
 	 public StudentlnContest view;
 	 public ScreenImageDTO imgModel = new ScreenImageDTO(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
 	 public Queue<BufferedImage> screenQueue = new ConcurrentLinkedQueue<>();
+	 public Queue<Mat> camQueue = new ConcurrentLinkedQueue<>();
+	 public Size camDim = new Size(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
+	 public Mat camImg = new Mat();
+	 public Mat frame = new Mat();
 	 public String currKeys = "";
 	
 	 public StudentController() {
@@ -53,10 +61,12 @@ public class StudentController extends InContestBaseController {
 	}
 	
 	 public void startThreads() {
-	     new CaptureThread(this,true).start();
-	     new SendThread(this, true).start();
-	     new LiveThread(this).start();
-	 }
+			new CaptureThread(this, true).start();
+			new CaptureThread(this, false).start();
+			new SendThread(this, true).start();
+			new SendThread(this, false).start();
+			new LiveThread(this).start();
+		}
 	
 	 public void addText(String txt) {
 	     view.addText(txt);
@@ -73,6 +83,7 @@ public class StudentController extends InContestBaseController {
 		ScreenImageDTO curr = imgModel; // Lưu lại khung ảnh cũ thành curr
 		imgModel = img; // Thay thế khung ảnh 
 		curr.g2d.dispose(); //Dọn dẹp tài nguyên của khung ảnh cũ để tránh rò rỉ bộ nhớ
+		this.camDim = new Size(width, height);
 	}
 	 public void back() {
 	     view.dispose();

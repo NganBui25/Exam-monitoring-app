@@ -6,6 +6,11 @@ import java.net.DatagramPacket;
 
 import javax.imageio.ImageIO;
 
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.core.Core;
 import Client.Constant;
 
 public class SendThread extends Thread {
@@ -15,6 +20,9 @@ public class SendThread extends Thread {
 	private byte[] tmp = new byte[Constant.PACKET_SIZE]; 
 	private ByteArrayOutputStream baos;
 
+	private Mat resizedFrame = new Mat();
+	private MatOfByte mob = new MatOfByte();
+	
 	public SendThread(StudentController par, boolean isScreen) {
 		this.par = par;
 		this.isScreen = isScreen;
@@ -32,7 +40,7 @@ public class SendThread extends Thread {
 		int header = Constant.PACKET_SIZE - Constant.IMAGE_SEGMENT;
 		while (par.running) {
 			try {
-				byte[] image = compressScreen();
+				byte[] image = compress();
 				long start = System.nanoTime();
 				
 				//Tính toán số lượng gói tin cần thiết
@@ -51,16 +59,30 @@ public class SendThread extends Thread {
 				}
 				currImg = (currImg + 1) % (isScreen ? Constant.MAX_SCREENS : Constant.MAX_CAMS);
 				System.out.println(System.nanoTime() - start);
+				if(isScreen) {
+	                System.out.println("Gửi SCREEN: " + (System.nanoTime() - start));
+	            } else {
+	                System.out.println("Gửi CAMERA: " + (System.nanoTime() - start));
+	            }
 				Thread.sleep(20);
 			} catch (Exception ex) {
 			}
 		}
 	}
 
-	private byte[] compressScreen() throws IOException {
-		baos.reset(); //xóa sạch dữ liệu của lần nén trước
-		//Lấy ảnh từ par.imgModel.img, nén ảnh theo định dạng jpg
-		ImageIO.write(par.imgModel.img, "jpg", baos);
-		return baos.toByteArray();
+	private byte[] compress() throws IOException {
+		if(isScreen) {
+			baos.reset(); //xóa sạch dữ liệu của lần nén trước
+			//Lấy ảnh từ par.imgModel.img, nén ảnh theo định dạng jpg
+			ImageIO.write(par.imgModel.img, "jpg", baos);
+			return baos.toByteArray();
+		}
+		else {
+			Imgproc.resize(par.frame, par.camImg, par.camDim);
+			Mat matTemp = par.camImg;
+			MatOfByte buffer = new MatOfByte();
+			Imgcodecs.imencode(".jpg", matTemp, mob);
+			return buffer.toArray();
+		}
 	}
 }
