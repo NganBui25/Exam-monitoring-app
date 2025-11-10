@@ -19,15 +19,18 @@ public class SendThread extends Thread {
 	private boolean isScreen;
 	private byte[] tmp = new byte[Constant.PACKET_SIZE]; 
 	private ByteArrayOutputStream baos;
-
-	private Mat resizedFrame = new Mat();
-	private MatOfByte mob = new MatOfByte();
+	private Mat resizedFrame;
+	private MatOfByte mob;
 	
 	public SendThread(StudentController par, boolean isScreen) {
 		this.par = par;
 		this.isScreen = isScreen;
 		tmp[0] = Byte.valueOf(par.roomId); //Byte đầu tiên mỗi gói tin là roomId
-		if(isScreen) baos = new ByteArrayOutputStream();
+		this.baos = new ByteArrayOutputStream();
+		if(!isScreen) {
+			resizedFrame = new Mat();
+			mob = new MatOfByte();
+		}
 	}
 	public void run() {
 		//Cấu trúc của 1 gói tin UDP
@@ -72,17 +75,23 @@ public class SendThread extends Thread {
 
 	private byte[] compress() throws IOException {
 		if(isScreen) {
-			baos.reset(); //xóa sạch dữ liệu của lần nén trước
-			//Lấy ảnh từ par.imgModel.img, nén ảnh theo định dạng jpg
+			baos.reset();
 			ImageIO.write(par.imgModel.img, "jpg", baos);
 			return baos.toByteArray();
 		}
 		else {
-			Imgproc.resize(par.frame, par.camImg, par.camDim);
-			Mat matTemp = par.camImg;
-			MatOfByte buffer = new MatOfByte();
-			Imgcodecs.imencode(".jpg", matTemp, mob);
-			return buffer.toArray();
+			Mat frame = par.camQueue.poll();
+			if (frame == null) {
+				return null;
+			}
+			
+			Imgproc.resize(frame, resizedFrame, par.camDim);
+			
+			Imgcodecs.imencode(".jpg", resizedFrame, mob);
+			
+			frame.release(); 
+			
+			return mob.toArray();
 		}
 	}
 }

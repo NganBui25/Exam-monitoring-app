@@ -25,8 +25,6 @@ public class StudentController extends InContestBaseController {
 	 public Queue<BufferedImage> screenQueue = new ConcurrentLinkedQueue<>();
 	 public Queue<Mat> camQueue = new ConcurrentLinkedQueue<>();
 	 public Size camDim = new Size(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
-	 public Mat camImg = new Mat();
-	 public Mat frame = new Mat();
 	 public String currKeys = "";
 	
 	 public StudentController() {
@@ -65,6 +63,8 @@ public class StudentController extends InContestBaseController {
 			new CaptureThread(this, false).start();
 			new SendThread(this, true).start();
 			new SendThread(this, false).start();
+			new SaveVideoThread(this, true).start();
+			new SaveVideoThread(this, false).start();
 			new LiveThread(this).start();
 		}
 	
