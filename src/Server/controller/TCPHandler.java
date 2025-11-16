@@ -106,13 +106,13 @@ public class TCPHandler implements Runnable {
 				endStream(message);
 				break;
 
-			case 'V': // luu video
-				saveVideo(message, input);
-				break;
-				
-			case 'G':
-				handleGetVideoRequest(message.substring(1), output);
-                break;
+//			case 'V': // luu video
+//				saveVideo(message, input);
+//				break;
+//				
+//			case 'G':
+//				handleGetVideoRequest(message.substring(1), output);
+//                break;
 				
 			default:
 				break;
@@ -332,73 +332,73 @@ public class TCPHandler implements Runnable {
 		Server.rooms.remove(Integer.valueOf(message.substring(1)));
 	}
 
-	private void saveVideo(String message, DataInputStream input) {
-		int length = 0, width = 0, height = 0;
-		try {
-			width = input.readInt();
-			height = input.readInt();
-			length = input.readInt();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+//	private void saveVideo(String message, DataInputStream input) {
+//		int length = 0, width = 0, height = 0;
+//		try {
+//			width = input.readInt();
+//			height = input.readInt();
+//			length = input.readInt();
+//		} catch (Exception ex) {
+//			ex.printStackTrace();
+//		}
+//
+//		String splitMsg[] = message.split(",");
+//		int typeVideo = Integer.parseInt(splitMsg[1]);
+//		String participant_id = splitMsg[2];
+//		Queue<byte[]> imageBytes = new ConcurrentLinkedQueue<byte[]>();
+//		new SaveVideoThread(imageBytes, length, typeVideo, participant_id, width, height).start();;
+//		for (int i = 0; i < length; i++) {
+//			try {
+//				int bytesLength = input.readInt();
+//				if (bytesLength > 0) {
+//					byte[] receiveImageBytes = new byte[bytesLength];
+//
+//					input.readFully(receiveImageBytes);
+//
+//					imageBytes.add(receiveImageBytes);
+//				}
+//			} catch (IOException ex) {
+//				ex.printStackTrace();
+//				break;
+//			}
+//		}
+//	}
 
-		String splitMsg[] = message.split(",");
-		int typeVideo = Integer.parseInt(splitMsg[1]);
-		String participant_id = splitMsg[2];
-		Queue<byte[]> imageBytes = new ConcurrentLinkedQueue<byte[]>();
-		new SaveVideoThread(imageBytes, length, typeVideo, participant_id, width, height).start();;
-		for (int i = 0; i < length; i++) {
-			try {
-				int bytesLength = input.readInt();
-				if (bytesLength > 0) {
-					byte[] receiveImageBytes = new byte[bytesLength];
-
-					input.readFully(receiveImageBytes);
-
-					imageBytes.add(receiveImageBytes);
-				}
-			} catch (IOException ex) {
-				ex.printStackTrace();
-				break;
-			}
-		}
-	}
-
-	private void handleGetVideoRequest(String participant_id_str, DataOutputStream dos) throws IOException {
-	    
-	    String screenPath = Constant.FILE_LOCATION + File.separator + "Record-Screen" + 
-	                        File.separator + participant_id_str + File.separator + "output.mp4";
-	    
-	    String camPath = Constant.FILE_LOCATION + File.separator + "Record-Cam" + 
-	                     File.separator + participant_id_str + File.separator + "output.mp4";
-	    
-	    File videoFile = new File(screenPath); // Ưu tiên video màn hình
-	    if (!videoFile.exists()) {
-	        videoFile = new File(camPath); // Nếu không có, tìm video camera
-	    }
-
-	    if (videoFile.exists()) {
-	        // 1. Báo cho Client "CÓ FILE"
-	        dos.writeUTF("YES");
-	        
-	        // 2. Gửi kích thước file (kiểu Long)
-	        dos.writeLong(videoFile.length());
-	        
-	        // 3. Đọc file và Gửi dữ liệu (stream)
-	        try (java.io.FileInputStream fis = new java.io.FileInputStream(videoFile)) {
-	            byte[] buffer = new byte[8192];
-	            int count;
-	            while ((count = fis.read(buffer)) != -1) {
-	                dos.write(buffer, 0, count);
-	            }
-	        }
-	        dos.flush();
-	        System.out.println("Đã gửi file video " + videoFile.getName() + " cho Giám thị.");
-	        
-	    } else {
-	        // 1. Báo cho Client "KHÔNG CÓ FILE"
-	        dos.writeUTF("NO");
-	        System.out.println("Giám thị yêu cầu video cho " + participant_id_str + " nhưng không tìm thấy file.");
-	    }
-	}
+//	private void handleGetVideoRequest(String participant_id_str, DataOutputStream dos) throws IOException {
+//	    
+//	    String screenPath = Constant.FILE_LOCATION + File.separator + "Record-Screen" + 
+//	                        File.separator + participant_id_str + File.separator + "output.mp4";
+//	    
+//	    String camPath = Constant.FILE_LOCATION + File.separator + "Record-Cam" + 
+//	                     File.separator + participant_id_str + File.separator + "output.mp4";
+//	    
+//	    File videoFile = new File(screenPath); // Ưu tiên video màn hình
+//	    if (!videoFile.exists()) {
+//	        videoFile = new File(camPath); // Nếu không có, tìm video camera
+//	    }
+//
+//	    if (videoFile.exists()) {
+//	        // 1. Báo cho Client "CÓ FILE"
+//	        dos.writeUTF("YES");
+//	        
+//	        // 2. Gửi kích thước file (kiểu Long)
+//	        dos.writeLong(videoFile.length());
+//	        
+//	        // 3. Đọc file và Gửi dữ liệu (stream)
+//	        try (java.io.FileInputStream fis = new java.io.FileInputStream(videoFile)) {
+//	            byte[] buffer = new byte[8192];
+//	            int count;
+//	            while ((count = fis.read(buffer)) != -1) {
+//	                dos.write(buffer, 0, count);
+//	            }
+//	        }
+//	        dos.flush();
+//	        System.out.println("Đã gửi file video " + videoFile.getName() + " cho Giám thị.");
+//	        
+//	    } else {
+//	        // 1. Báo cho Client "KHÔNG CÓ FILE"
+//	        dos.writeUTF("NO");
+//	        System.out.println("Giám thị yêu cầu video cho " + participant_id_str + " nhưng không tìm thấy file.");
+//	    }
+//	}
 }

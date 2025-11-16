@@ -385,7 +385,7 @@ public class TeacherDashboard extends javax.swing.JFrame {
 		    }
 		    
 		    // Yêu cầu Controller tải video này
-		    teacherController.requestVideoFile(participant_id); 
+//		    teacherController.requestVideoFile(participant_id); 
 		});
 
 		// Tạo nút dạng "file txt"

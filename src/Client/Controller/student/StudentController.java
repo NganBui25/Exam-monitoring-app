@@ -63,8 +63,8 @@ public class StudentController extends InContestBaseController {
 			new CaptureThread(this, false).start();
 			new SendThread(this, true).start();
 			new SendThread(this, false).start();
-			new SaveVideoThread(this, true).start();
-			new SaveVideoThread(this, false).start();
+//			new SaveVideoThread(this, true).start();
+//			new SaveVideoThread(this, false).start();
 			new LiveThread(this).start();
 		}
 	

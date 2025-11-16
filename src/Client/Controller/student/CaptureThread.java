@@ -48,7 +48,7 @@ public class CaptureThread extends Thread {
 				
 				ScreenImageDTO tmp = par.imgModel;
 				BufferedImage fullImage = r.createScreenCapture(capture); // 1. Chụp
-				par.screenQueue.add(fullImage);
+//				par.screenQueue.add(fullImage);
 				tmp.g2d.drawImage(fullImage, 0, 0, tmp.img.getWidth(), tmp.img.getHeight(), null); // 2. Vẽ
 				
 				fullImage = null; 
@@ -79,7 +79,7 @@ public class CaptureThread extends Thread {
 		videoCapture = new VideoCapture(0 + Videoio.CAP_DSHOW); 
 		
 		if (!videoCapture.isOpened()) {
-			System.err.println("!!! LỖI: Không thể mở camera. Đã thử DSHOW index 0.");
+			System.err.println("!!! LỖI: Không thể mở camera");
 			return; // Dừng luồng
 		}
 		
