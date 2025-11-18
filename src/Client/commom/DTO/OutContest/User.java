@@ -1,4 +1,4 @@
-package Client.commom.DTO.OutContest;
+package src.Client.commom.DTO.OutContest;
 
 public class User {
 	private int id;

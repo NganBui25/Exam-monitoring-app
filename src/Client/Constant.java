@@ -1,12 +1,12 @@
-package Client;
+package src.Client;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.InetAddress;
 
 public class Constant {
 	
 	//Server
-	public static String IP = "localhost";
+	public static String IP = "192.168.1.57";
 	public static InetAddress serverAddress;
 	public static final int tcpPort = 8888;
 	public static final int udpPort = 9999;

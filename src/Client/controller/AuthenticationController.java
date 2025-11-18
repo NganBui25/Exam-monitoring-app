@@ -1,14 +1,15 @@
-package Client.controller;
+package src.Client.controller;
 
 import java.io.DataInputStream;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import Client.Constant;
-import Client.controller.teacher.DashboardController;
-import Client.commom.DTO.OutContest.User;
-import Client.commom.Util.Service;
+import src.Client.Constant;
+import src.Client.controller.teacher.DashboardController;
+import src.Client.commom.DTO.OutContest.User;
+import src.Client.commom.Util.Service;
 
 public class AuthenticationController {
 

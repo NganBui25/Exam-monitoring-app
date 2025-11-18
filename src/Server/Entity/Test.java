@@ -1,4 +1,4 @@
-package Server.entity;
+package src.Server.entity;
 
 import java.util.Date;
 

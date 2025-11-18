@@ -1,4 +1,4 @@
-package Server.entity;
+package src.Server.entity;
 
 public class Participant {
 	int id; 

@@ -1,11 +1,11 @@
-package Client.controller;
+package src.Client.controller;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.Socket;
 
-import Client.Constant;
+import src.Client.Constant;
 
 public class InContestBaseController{
 	public String roomId;

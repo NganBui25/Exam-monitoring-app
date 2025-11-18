@@ -1,4 +1,4 @@
-package Server.Utils;
+package src.Server.Utils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -9,8 +9,10 @@ import java.sql.Statement;
 public class DBHelper {
 	private final String dbName = "PBL4LN";
 	private final String userID = "root";
+
 	private final String password = "113Duongvanan@";
 	private final String url = "jdbc:mysql://localhost:3306/" + dbName + "?useSSL=false";
+
 	private Connection conn;
 	private PreparedStatement ps;
 	private static DBHelper _Instance;
@@ -46,34 +48,29 @@ public class DBHelper {
 	}
 
 	public int addAndReturnId(String sql, Object... parameterValues) throws ClassNotFoundException, SQLException {
-		int generatedId = -1; // Biến để lưu ID vừa được tạo
-		
+		int generatedId = -1; 
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			conn = DriverManager.getConnection(url, userID, password);
 
-			// Chuẩn bị câu lệnh với RETURN_GENERATED_KEYS
 			ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			for (int i = 0; i < parameterValues.length; i++) {
 				ps.setObject(i + 1, parameterValues[i]);
 			}
 
-			// Thực thi câu lệnh thêm
 			ps.executeUpdate();
 
-			// Lấy ID vừa được tạo
 			ResultSet rs = ps.getGeneratedKeys();
 			if (rs.next()) {
-				generatedId = rs.getInt(1); // Lấy ID từ cột đầu tiên
+				generatedId = rs.getInt(1); 
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {
-			// Đảm bảo đóng PreparedStatement và Connection
 			CloseConn();
 		}
 
-		return generatedId; // Trả về ID vừa được thêm
+		return generatedId; 
 	}
 
 	public void CloseConn() {

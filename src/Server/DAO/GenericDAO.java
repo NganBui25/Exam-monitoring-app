@@ -1,11 +1,11 @@
-package Server.dao;
+package src.Server.dao;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import Server.Utils.DBHelper;
-import Server.Utils.RowMapper;
-//Tái sử dụng CRUD
+import src.Server.Utils.DBHelper;
+import src.Server.Utils.RowMapper;
+
 public class GenericDAO<T> {
 	private final RowMapper<T> rowMapper;
 

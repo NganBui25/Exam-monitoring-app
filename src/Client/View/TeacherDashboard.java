@@ -1,11 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
-package Client.view;
+package src.Client.view;
 
 import java.awt.CardLayout;
+
 import java.awt.Image;
+import java.io.File;
 import java.net.URL;
 import java.util.List;
 
@@ -15,6 +13,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+
+import src.Client.commom.DTO.OutContest.Participant;
+import src.Client.commom.DTO.OutContest.ParticipantTableModel;
+import src.Client.commom.DTO.OutContest.Test;
+import src.Client.commom.DTO.OutContest.TestTableModel;
 
 //import Client.dto.OutContest.Participant;
 //import Client.dto.OutContest.ParticipantTableModel;
@@ -27,9 +30,9 @@ import javax.swing.JTable;
  */
 public class TeacherDashboard extends javax.swing.JFrame {
 
-	Client.controller.teacher.DashboardController teacherController;
+	src.Client.controller.teacher.DashboardController teacherController;
 
-	public TeacherDashboard(Client.controller.teacher.DashboardController teacherController) {
+	public TeacherDashboard(src.Client.controller.teacher.DashboardController teacherController) {
 		initComponents();
 
 		this.teacherController = teacherController;
@@ -89,7 +92,7 @@ public class TeacherDashboard extends javax.swing.JFrame {
 		lsct.setLabel("Lịch sử cuộc thi");
 		lsct.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-	/*			lsctActionPerformed(evt);              */
+				lsctActionPerformed(evt);              
 			}
 		});
 
@@ -236,7 +239,7 @@ public class TeacherDashboard extends javax.swing.JFrame {
 		lsct_xemchitiet.setText("Xem chi tiết");
 		lsct_xemchitiet.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-	/*			lsct_xemchitietActionPerformed(evt);*/
+				lsct_xemchitietActionPerformed(evt);
 			}
 		});
 
@@ -327,14 +330,14 @@ public class TeacherDashboard extends javax.swing.JFrame {
 		backButton.addActionListener(e -> {
 			cardLayout.show(mainPanel, "LSCT");
 		});
-/*
+
 		// Thêm sự kiện cho nút xem chi tiết
 		detailsButton.addActionListener(e -> {
 			int row = ctct_jtable.getSelectedRow();
 			participant_id = ptcp_model.getParticipantAt(row).getId();
 			cardLayout.show(mainPanel, "DetailForm");
 		});
-*/
+
 		// Tạo bảng với ParticipantTableModel
 		ctct_jtable = new JTable();
 		JScrollPane tableScrollPane = new JScrollPane(ctct_jtable);
@@ -373,8 +376,16 @@ public class TeacherDashboard extends javax.swing.JFrame {
 
 		// Tạo nút dạng "clip"
 		JButton clipButton = new JButton("Record screen"); // Biểu tượng clip
-		clipButton.addActionListener(e -> {
+		clipButton.setEnabled(true); // Bật nút lên
 
+		clipButton.addActionListener(e -> {
+		    if (participant_id == null) {
+		        JOptionPane.showMessageDialog(this, "Chưa chọn thí sinh.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+		        return;
+		    }
+		    
+		    // Yêu cầu Controller tải video này
+//		    teacherController.requestVideoFile(participant_id); 
 		});
 
 		// Tạo nút dạng "file txt"
@@ -418,7 +429,7 @@ public class TeacherDashboard extends javax.swing.JFrame {
 	private void trangchuActionPerformed(java.awt.event.ActionEvent evt) {
 		cardLayout.show(mainPanel, "TrangChu");
 	}
-/*
+
 	private void lsctActionPerformed(java.awt.event.ActionEvent evt) {
 		cardLayout.show(mainPanel, "LSCT");
 
@@ -427,7 +438,7 @@ public class TeacherDashboard extends javax.swing.JFrame {
 		lsct_model = new TestTableModel(data);
 		lsct_jtable.setModel(lsct_model);
 	}
-*/
+
 	private void nguoidungActionPerformed(java.awt.event.ActionEvent evt) {
 		cardLayout.show(mainPanel, "NguoiDung");
 	}
@@ -447,7 +458,7 @@ public class TeacherDashboard extends javax.swing.JFrame {
 	private void capnhatActionPerformed(java.awt.event.ActionEvent evt) {
 		teacherController.capnhatmatkhau(password.getText());
 	}
-/*
+
 	private void lsct_xemchitietActionPerformed(java.awt.event.ActionEvent evt) {
 		int selectedRow = lsct_jtable.getSelectedRow();
 
@@ -459,14 +470,14 @@ public class TeacherDashboard extends javax.swing.JFrame {
 			ptcp_model = new ParticipantTableModel(data);
 			ctct_jtable.setModel(ptcp_model);
 		}
-	}*/
+	}
 
 	private void trangchu_batdauActionPerformed(java.awt.event.ActionEvent evt) {
 		teacherController.batdau(tencuocthi.getText());
 	}
 
-	//private Client.dto.OutContest.TestTableModel lsct_model;
-	//private Client.dto.OutContest.ParticipantTableModel ptcp_model;
+	private src.Client.commom.DTO.OutContest.TestTableModel lsct_model;
+	private src.Client.commom.DTO.OutContest.ParticipantTableModel ptcp_model;
 	private java.awt.CardLayout cardLayout;
 	private javax.swing.JLabel camera;
 	private javax.swing.JButton capnhat;

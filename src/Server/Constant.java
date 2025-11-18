@@ -1,4 +1,4 @@
-package Server;
+package src.Server;
 
 public class Constant {
 	public static final long TIMEOUT = 10000;

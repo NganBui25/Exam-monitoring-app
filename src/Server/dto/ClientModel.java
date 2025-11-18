@@ -1,4 +1,4 @@
-package Server.dto;
+package src.Server.dto;
 
 public class ClientModel {
 	private long time;

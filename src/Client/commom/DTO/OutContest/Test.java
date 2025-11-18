@@ -1,4 +1,4 @@
-package Client.commom.DTO.OutContest;
+package src.Client.commom.DTO.OutContest;
 
 import java.util.Date;
 

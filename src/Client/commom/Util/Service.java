@@ -1,4 +1,4 @@
-package Client.commom.Util;
+package src.Client.commom.Util;
 import javax.swing.JOptionPane;
 
 public class Service {

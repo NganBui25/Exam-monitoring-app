@@ -1,4 +1,6 @@
-package Client.view.Utils;
+
+package src.Client.view.Utils;
+
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

@@ -1,4 +1,4 @@
-package Client.commom.DTO.InContest.Teacher;
+package src.Client.commom.DTO.InContest.Teacher;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

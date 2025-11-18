@@ -1,5 +1,4 @@
-
-package Server.controller;
+package src.Server.controller;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -17,22 +16,23 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import Server.Constant;
 
-import Server.dao.ParticipantDAO;
-import Server.dao.TestDAO;
-import Server.dao.UserDAO;
-import Server.dto.ClientModel;
-import Server.dto.Room;
-import Server.entity.Participant;
-import Server.entity.Test;
-import Server.entity.User;
-import Server.Utils.Service;
+import src.Server.controller.SaveVideoThread;
+import src.Server.Constant;
+
+import src.Server.dao.*;
+
+import src.Server.dto.*;
+
+import src.Server.entity.*;
+
+import src.Server.Utils.Service;
 
 
+//xử lý tất cả các yêu cầu được gửi từ 1 client duy nhất thông qua giao thức TCP
 public class TCPHandler implements Runnable {
-	private Socket socket;
-	private InetAddress address;
+	private Socket socket; //đại diện cho kết nối của 1 client
+	private InetAddress address; //địa chỉ IP tương ứng 
 
 	public TCPHandler(Socket socket) {
 		this.socket = socket;
@@ -45,21 +45,7 @@ public class TCPHandler implements Runnable {
 				DataOutputStream output = new DataOutputStream(socket.getOutputStream())) {
 			String message = input.readUTF();
 			char msgCode = message.charAt(0);
-			String[] msges;
 			switch (msgCode) {
-
-//			case 'C': // C<udpPort> <teacherName>
-//				int[] id = createRoom(message);
-//				output.writeUTF(id[0] + " " + id[1]);
-//				break;
-
-//			case 'J': // J<roomId> <udpPort> <studentName>
-//				int studentId = joinRoom(message);
-//				if (studentId != 0)
-//					output.writeUTF("Y" + studentId);
-//				else
-//					output.writeUTF("N");
-
 			case 'C': // C<udpPort> <id> <tencuocthi>
 				int id = createRoom(message);
 				output.writeUTF(id + "");
@@ -67,11 +53,10 @@ public class TCPHandler implements Runnable {
 
 			case 'J': // J<roomId> <udpPort> <studentName>
 				joinRoom(message, output);
-
 				break;
 
 			case 'H': // H<roomId> <studentNum>
-				msges = message.split(" ");
+				String[] msges = message.split(" ");
 				focus(msges);
 				break;
 
@@ -79,19 +64,6 @@ public class TCPHandler implements Runnable {
 				if (!texting(message))
 					output.writeUTF("Q");
 				break;
-
-//			case 'S': // I am alive cua student: S<roomId> <id> <STT tin nhan>
-//				// Kiem tra tin nhan, focus
-//				msges = message.split(" ");
-//				if (!checkStudent(msges, output))
-//					output.writeUTF("Q");
-//				break;
-
-//			case 'T': // I am alive cua teacher: T<roomId> <STT tin nhan>
-//				// Kiem tra tin nhan, hoc sinh da thoat
-//				msges = message.split(" ");
-//				if (!checkTeacher(msges, output))
-//					output.writeUTF("Q");
 
 			case 'S':
 				checkStudent(message, output);
@@ -135,32 +107,30 @@ public class TCPHandler implements Runnable {
 				endStream(message);
 				break;
 
+<<<<<<< HEAD
 			case 'V': // luu video
 				saveVideo(message, input);
 
 				break;*/
+
 			default:
 				break;
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
-
 		} finally {
 			try {
 				socket.close();
 			} catch (IOException e) {
-
 				e.printStackTrace();
 			}
 		}
 	}
 
-	
-	
-
 	private int createRoom(String msg) {
-		int i = msg.indexOf(" ");
+		//msg có dạng: "C"<udpPort> <user_id> <tencuocthi>
+		int i = msg.indexOf(" "); 
 		int udpPort = Integer.valueOf(msg.substring(1, i));
 		int j = msg.indexOf(" ", i + 1);
 		String user_id = msg.substring(i + 1, j);
@@ -172,13 +142,11 @@ public class TCPHandler implements Runnable {
 	}
 
 	private void joinRoom(String msg, DataOutputStream output) throws Exception {
-
 		int i = msg.indexOf(" ");
 		int j = msg.indexOf(" ", i + 1);
 		int roomId = Integer.valueOf(msg.substring(1, i));
 		Room room = Server.rooms.get(roomId);
 		if (room != null) {
-
 			String name = msg.substring(j + 1);
 			int studentId = ParticipantDAO.addParticipant(roomId, name);
 			int studentNum = room.getNewStudentId().getAndIncrement();
@@ -190,7 +158,6 @@ public class TCPHandler implements Runnable {
 			output.writeUTF("Y" + studentId + " " + room.getTeachername());
 		} else
 			output.writeUTF("N");
-
 	}
 
 	private void focus(String[] msges) {
@@ -204,7 +171,6 @@ public class TCPHandler implements Runnable {
 	}
 
 	private boolean texting(String msg) throws UnsupportedEncodingException {
-
 		int i = msg.indexOf(" ");
 		int roomId = Integer.valueOf(msg.substring(1, i));
 		Room room = Server.rooms.get(roomId);
@@ -215,53 +181,6 @@ public class TCPHandler implements Runnable {
 		return false;
 	}
 
-	private void sendMessage(ArrayList<String> chatHistory, int msgNum, DataOutputStream output) throws Exception {
-		// tin nhan thi gui ki hieu bat dau, gui cac tin nhan con thieu, gui ki hieu ket
-		// thuc
-		if (msgNum < chatHistory.size()) {
-			output.writeUTF("mvk");
-			while (msgNum < chatHistory.size())
-				output.writeUTF(chatHistory.get(msgNum++));
-
-			output.writeUTF("mvk");
-		}
-	}
-
-	private boolean checkStudent(String[] msges, DataOutputStream output) throws Exception {
-		int roomId = Integer.valueOf(msges[0].substring(1));
-		Room room = Server.rooms.get(roomId);
-		if (room != null) {
-			int id = Integer.parseInt(msges[1]);
-			room.getStudents().get(id).setTime(System.currentTimeMillis());
-			// Xu ly focus
-			if (id == room.getFocusAddress())
-				output.writeUTF("H");
-			else
-				output.writeUTF("~H");
-
-			sendMessage(room.getChatHistory(), Integer.parseInt(msges[2]), output);
-			output.writeUTF("E");
-			return true;
-		}
-		return false;
-	}
-
-	private boolean checkTeacher(String[] msges, DataOutputStream output) throws Exception {
-		int roomId = Integer.valueOf(msges[0].substring(1));
-		Room room = Server.rooms.get(roomId);
-		if (room != null) {
-			room.getTeacher().setTime(System.currentTimeMillis());
-			// Xoa cac hoc sinh da thoat
-			Queue<Integer> quitted = room.getQuittedStudents();
-			while (!quitted.isEmpty())
-				output.writeUTF("D" + quitted.poll());
-
-			sendMessage(room.getChatHistory(), Integer.parseInt(msges[1]), output);
-			output.writeUTF("E");
-			return true;
-		}
-		return false;
-	}
 	private void checkStudent(String message, DataOutputStream dos) throws Exception {
 		int i = message.indexOf(" ");
 		int j = message.indexOf(" ", i + 1);
@@ -362,7 +281,7 @@ public class TCPHandler implements Runnable {
 	}
 
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-/*
+
 	private void handleListTestRequest(String msg, DataOutputStream dos) throws IOException {
 		String[] splitMsg = msg.split(",");
 		String user_id = splitMsg[1];
@@ -372,7 +291,7 @@ public class TCPHandler implements Runnable {
 			for (int i = 0; i < listData.size(); i++) {
 				Test t = listData.get(i);
 				sendMsg.append(t.getId()).append(",").append(t.getName()).append(",")
-						.append(dateFormat.format(t.getCreated_at())).append(",");
+						.append(dateFormat.format(t.getCreate())).append(",");
 
 				if (i != listData.size() - 1)
 					sendMsg.append("|");
@@ -412,36 +331,4 @@ public class TCPHandler implements Runnable {
 		Server.rooms.remove(Integer.valueOf(message.substring(1)));
 	}
 
-	private void saveVideo(String message, DataInputStream input) {
-		int length = 0, width = 0, height = 0;
-		try {
-			width = input.readInt();
-			height = input.readInt();
-			length = input.readInt();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		String splitMsg[] = message.split(",");
-		int typeVideo = Integer.parseInt(splitMsg[1]);
-		String participant_id = splitMsg[2];
-		Queue<byte[]> imageBytes = new ConcurrentLinkedQueue<byte[]>();
-		new SaveVideoThread(imageBytes, length, typeVideo, participant_id, width, height).start();;
-		for (int i = 0; i < length; i++) {
-			try {
-				int bytesLength = input.readInt();
-				if (bytesLength > 0) {
-					byte[] receiveImageBytes = new byte[bytesLength];
-
-					input.readFully(receiveImageBytes);
-
-					imageBytes.add(receiveImageBytes);
-				}
-			} catch (IOException ex) {
-				ex.printStackTrace();
-				break;
-			}
-		}
-	}
-	*/
 }

@@ -1,9 +1,9 @@
-package Client.commom.DTO.InContest;
+package src.Client.commom.DTO.InContest;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-
+//Tạo và quản lý 1 hình ảnh trong bộ nhớ 
 public class ScreenImageDTO {
 	public BufferedImage img;
 	public Graphics2D g2d;

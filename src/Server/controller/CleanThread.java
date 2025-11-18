@@ -1,10 +1,10 @@
-package Server.controller;
+package src.Server.controller;
 
 import java.util.Map;
 
-import Server.Constant;
-import Server.dto.ClientModel;
-import Server.dto.Room;
+import src.Server.Constant;
+import src.Server.dto.ClientModel;
+import src.Server.dto.Room;
 
 public class CleanThread implements Runnable {
 	public void run() {

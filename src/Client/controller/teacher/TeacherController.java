@@ -1,4 +1,4 @@
-package Client.controller.teacher;
+package src.Client.controller.teacher;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,18 +10,18 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import Client.Constant;
-import Client.controller.InContestBaseController;
-//import Client.dto.InContest.Teacher.ImageModel;
-//import Client.DTO.InContest.Teacher.Packet;
-import Client.view.TeacherInContest;
+import src.Client.Constant;
+import src.Client.controller.InContestBaseController;
+import src.Client.commom.DTO.InContest.Teacher.ImageModel;
+import src.Client.commom.DTO.InContest.Teacher.Packet;
+import src.Client.view.TeacherInContest;
 
 public class TeacherController extends InContestBaseController{
 	
-//	public Queue<Packet> packets = new ConcurrentLinkedQueue<>();
-//	public Map<Integer, ArrayList<ImageModel>> images = new ConcurrentHashMap<>();
-	//public ImageModel currImage;
-//	public ArrayList<ImageModel> viewList = new ArrayList<>();
+	public Queue<Packet> packets = new ConcurrentLinkedQueue<>();
+	public Map<Integer, ArrayList<ImageModel>> images = new ConcurrentHashMap<>();
+	public ImageModel currImage;
+	public ArrayList<ImageModel> viewList = new ArrayList<>();
 	public TeacherInContest view;
 	public DashboardController dashboardController;
 		
@@ -32,21 +32,21 @@ public class TeacherController extends InContestBaseController{
 		this.roomId = roomId;
 		this.udpSocket = udpSocket;
 		view = new TeacherInContest(this);
-//		new ReceiveThread(this).start();
-//		new LiveThread(this).start();
+		new ReceiveThread(this).start();
+		new LiveThread(this).start();
 	}
-	/*
+	
 	public void endStream() {
 		running = false;
 		try (Socket tcpSocket = new Socket(Constant.serverAddress, Constant.tcpPort);
-				DataOutputStream dos = new DataOutputStream(tcpSocket.getOutputStream())) {
+			DataOutputStream dos = new DataOutputStream(tcpSocket.getOutputStream())) {
 			dos.writeUTF("Q" + roomId);
-		} catch (IOException e1) {
+		} catch (IOException e1) { 
 			e1.printStackTrace();
 		}
 		view.dispose();
 		dashboardController.view.setVisible(true);
-	}*/
+	}
 	
 	public void focus(int studentNum) {
 		try (Socket tcpSocket = new Socket(Constant.serverAddress, Constant.tcpPort);

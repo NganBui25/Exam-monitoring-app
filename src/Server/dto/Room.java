@@ -1,4 +1,4 @@
-package Server.dto;
+package src.Server.dto;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
