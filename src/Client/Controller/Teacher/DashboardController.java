@@ -2,11 +2,15 @@ package Client.Controller.Teacher;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JOptionPane;
 
 import Client.Constant;
 import Client.commom.DTO.OutContest.Participant;
@@ -15,7 +19,7 @@ import Client.commom.DTO.OutContest.User;
 import Client.commom.Util.Service;
 import Client.View.Home;
 import Client.View.TeacherDashboard;
-//import Client.view.KeyLog.KeyLog;
+import Client.View.KeyLog.KeyLog;
 
 public class DashboardController {
 	public User user;
@@ -124,7 +128,7 @@ public class DashboardController {
 				DataOutputStream dos = new DataOutputStream(soc.getOutputStream())) {
 			dos.writeUTF(msg);
 			String receiveMsg = dis.readUTF();
-		//	new KeyLog(receiveMsg);
+			new KeyLog(receiveMsg);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

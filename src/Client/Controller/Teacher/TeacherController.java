@@ -24,6 +24,7 @@ public class TeacherController extends InContestBaseController{
 	public ArrayList<ImageModel> viewList = new ArrayList<>();
 	public TeacherInContest view;
 	public DashboardController dashboardController;
+	private int currentFocusIndex = -1;
 		
 	public TeacherController(DashboardController dashboardController, String name, String roomId, DatagramSocket udpSocket) {
 		super();
@@ -56,7 +57,6 @@ public class TeacherController extends InContestBaseController{
 			e1.printStackTrace();
 		}
 	}
-	
 	public void setImage(byte[] img, int cameraNum) {
 		view.setImage(img, cameraNum);
 	}
@@ -67,6 +67,15 @@ public class TeacherController extends InContestBaseController{
 	
 	public void deleteStudent(int studentNum) {
 		view.deleteStudent(studentNum);
+		try (Socket tcpSocket = new Socket(Constant.serverAddress, Constant.tcpPort);
+		         DataOutputStream dos = new DataOutputStream(tcpSocket.getOutputStream())) {
+		        
+		        dos.writeUTF("X" + roomId + " " + studentNum);
+		        System.out.println("Teacher đã gửi lệnh Kick (X) cho: " + studentNum);
+		        
+		    } catch (IOException e1) {
+		        e1.printStackTrace();
+		    }
 	}
 	
 	public void addText(String txt) {
@@ -81,5 +90,13 @@ public class TeacherController extends InContestBaseController{
 		String res = "";
 		for(int k = 4; k < splits.length; k += 2) res += splits[k];
 		view.addKeyLog(studentNum, start + "-" + end, res + "\n");
+	}
+	public void warnStudent(int studentNum, String message) {
+		try(Socket tcpSocket = new Socket(Constant.serverAddress, Constant.tcpPort);
+				DataOutputStream dos = new DataOutputStream(tcpSocket.getOutputStream())){
+			dos.writeUTF("W" + roomId + " " + studentNum + " " + message);
+		}catch(IOException e1) {
+			e1.printStackTrace();
+		}
 	}
 }

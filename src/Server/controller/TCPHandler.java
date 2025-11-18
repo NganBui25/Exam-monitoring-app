@@ -17,7 +17,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import Server.Constant;
-import Server.controller.Server;
 import Server.DAO.ParticipantDAO;
 import Server.DAO.TestDAO;
 import Server.DAO.UserDAO;
@@ -105,17 +104,28 @@ public class TCPHandler implements Runnable {
 			case 'Q': // Teacher bam nut ket thuc
 				endStream(message);
 				break;
+			case 'W':
+				handlerWarning(message);
+				break;
+			
+			case 'X': // Lệnh Kick (Trục xuất)
+                handleKick(message);
+                break;
 
-			//case 'V': // luu video
-				//saveVideo(message, input);
-				//break;
+//			case 'V': // luu video
+//				saveVideo(message, input);
+//				break;
+//				
+//			case 'G':
+//				handleGetVideoRequest(message.substring(1), output);
+//                break;
 				
 			default:
 				break;
 			}
 
 		} catch (Exception e) {
-//			e.printStackTrace();
+			e.printStackTrace();
 		} finally {
 			try {
 				socket.close();
@@ -123,6 +133,40 @@ public class TCPHandler implements Runnable {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void handleKick(String msg) {
+		try {
+			int i = msg.indexOf(" ");
+			int roomId = Integer.valueOf(msg.substring(1, i));
+			int studentNum = Integer.valueOf(msg.substring(i + 1));
+			
+			Room room = Server.rooms.get(roomId);
+			if (room != null) {
+                ClientModel student = room.getStudentByNum(studentNum);
+				if (student != null) {
+					System.out.println(">>> [SERVER-DEBUG] Đã thêm 'KICK' vào hàng đợi của Student: " + studentNum);
+                    student.addWarning("KICK");
+                }
+                
+                room.getQuittedStudents().add(studentNum);
+			}
+		} catch (Exception e) { e.printStackTrace(); }
+		
+	}
+
+	private void handlerWarning(String msg) {
+		try {
+			int i = msg.indexOf(" ");
+			int j = msg.indexOf(" ", i + 1);
+	        int roomId = Integer.valueOf(msg.substring(1, i));
+	        int studentNum = Integer.valueOf(msg.substring(i + 1, j));
+	        String text = msg.substring(j + 1);
+	        Room room = Server.rooms.get(roomId);
+	        if (room != null) {
+	            room.getStudentByNum(studentNum).addWarning(text); 
+	        }
+	    } catch (Exception e) { e.printStackTrace(); }
 	}
 
 	private int createRoom(String msg) {
@@ -161,7 +205,7 @@ public class TCPHandler implements Runnable {
 		int studentNum = Integer.parseInt(msges[1]);
 		Room room = Server.rooms.get(Integer.parseInt(msges[0].substring(1)));
 		int id = room.getForFocus().get(studentNum);
-		if (id == room.getFocusAddress()) //lấy ra ID của luồng video hiện tại đang focus
+		if (id == room.getFocusAddress())
 			room.setFocusAddress(-1);
 		else
 			room.setFocusAddress(id);
@@ -186,7 +230,8 @@ public class TCPHandler implements Runnable {
 		if (room != null) {
 			int studentId = Integer.parseInt(message.substring(i + 1, j));
 			int msgNum = Integer.parseInt(message.substring(j + 1));
-			room.getStudents().get(studentId).setTime(System.currentTimeMillis());
+			ClientModel student = room.getStudents().get(studentId);
+		    student.setTime(System.currentTimeMillis());
 
 			if (studentId * 2 == room.getFocusAddress()) {
 				dos.writeUTF("H1");
@@ -199,6 +244,10 @@ public class TCPHandler implements Runnable {
 				dos.writeUTF("M" + chatHistory.get(msgNum));
 				msgNum++;
 			}
+			Queue<String> warnings = student.getWarnings(); 
+		    while (!warnings.isEmpty()) {
+		        dos.writeUTF("ALERT:" + warnings.poll()); 
+		    }
 			dos.writeUTF("E");
 		} else
 			dos.writeUTF("Q");
@@ -328,23 +377,4 @@ public class TCPHandler implements Runnable {
 		Server.rooms.remove(Integer.valueOf(message.substring(1)));
 	}
 
-	/*
-	 * private void saveVideo(String message, DataInputStream input) { int length =
-	 * 0, width = 0, height = 0; try { width = input.readInt(); height =
-	 * input.readInt(); length = input.readInt(); } catch (Exception ex) {
-	 * ex.printStackTrace(); }
-	 * 
-	 * String splitMsg[] = message.split(","); int typeVideo =
-	 * Integer.parseInt(splitMsg[1]); String participant_id = splitMsg[2];
-	 * Queue<byte[]> imageBytes = new ConcurrentLinkedQueue<byte[]>(); new
-	 * SaveVideoThread(imageBytes, length, typeVideo, participant_id, width,
-	 * height).start();; for (int i = 0; i < length; i++) { try { int bytesLength =
-	 * input.readInt(); if (bytesLength > 0) { byte[] receiveImageBytes = new
-	 * byte[bytesLength];
-	 * 
-	 * input.readFully(receiveImageBytes);
-	 * 
-	 * imageBytes.add(receiveImageBytes); } } catch (IOException ex) {
-	 * ex.printStackTrace(); break; } } }
-	 */
 }

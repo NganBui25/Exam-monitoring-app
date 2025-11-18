@@ -46,34 +46,29 @@ public class DBHelper {
 	}
 
 	public int addAndReturnId(String sql, Object... parameterValues) throws ClassNotFoundException, SQLException {
-		int generatedId = -1; // Biến để lưu ID vừa được tạo
-		
+		int generatedId = -1; 
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			conn = DriverManager.getConnection(url, userID, password);
 
-			// Chuẩn bị câu lệnh với RETURN_GENERATED_KEYS
 			ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			for (int i = 0; i < parameterValues.length; i++) {
 				ps.setObject(i + 1, parameterValues[i]);
 			}
 
-			// Thực thi câu lệnh thêm
 			ps.executeUpdate();
 
-			// Lấy ID vừa được tạo
 			ResultSet rs = ps.getGeneratedKeys();
 			if (rs.next()) {
-				generatedId = rs.getInt(1); // Lấy ID từ cột đầu tiên
+				generatedId = rs.getInt(1); 
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {
-			// Đảm bảo đóng PreparedStatement và Connection
 			CloseConn();
 		}
 
-		return generatedId; // Trả về ID vừa được thêm
+		return generatedId; 
 	}
 
 	public void CloseConn() {

@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
+import org.opencv.videoio.Videoio;
 
 import Client.Constant;
 import Client.commom.DTO.InContest.ScreenImageDTO;
@@ -16,6 +17,7 @@ import Client.commom.DTO.InContest.ScreenImageDTO;
 public class CaptureThread extends Thread {
 	private StudentController par;
 	private boolean isScreen; 
+	private VideoCapture videoCapture;
 	
 	public CaptureThread(StudentController par, boolean isScreen) {
 		this.par = par;
@@ -25,6 +27,8 @@ public class CaptureThread extends Thread {
 	public void run() {
 		if (isScreen)
 			captureScreen();
+		else
+			captureCam();
 	}
 
 	private void captureScreen() {
@@ -36,30 +40,42 @@ public class CaptureThread extends Thread {
 			r = new Robot();
 		} catch (AWTException e) {
 			e.printStackTrace();
+			par.running = false;
+			return;
 		}
 		while (par.running) {
 			ScreenImageDTO tmp = par.imgModel;
-			BufferedImage fullImage = r.createScreenCapture(capture);
-			par.screenQueue.add(fullImage);
-			tmp.g2d.drawImage(fullImage, 0, 0, tmp.img.getWidth(), tmp.img.getHeight(), null);
+			BufferedImage fullImage = r.createScreenCapture(capture); 
+			tmp.g2d.drawImage(fullImage, 0, 0, tmp.img.getWidth(), tmp.img.getHeight(), null); 
 		}
 	}
 	
 	public void captureCam() {
-		VideoCapture camera = new VideoCapture(0);
-		Constant.camWidth = (int) camera.get(org.opencv.videoio.Videoio.CAP_PROP_FRAME_WIDTH);
-		Constant.camHeight = (int) camera.get(org.opencv.videoio.Videoio.CAP_PROP_FRAME_HEIGHT);
-		par.camImg = new Mat();
+		videoCapture = new VideoCapture(0 + Videoio.CAP_DSHOW); 
+		
+		if (!videoCapture.isOpened()) {
+			System.err.println("!!! LỖI: Không thể mở camera");
+			return; 
+		}
+		
+		Constant.camWidth = (int) videoCapture.get(org.opencv.videoio.Videoio.CAP_PROP_FRAME_WIDTH);
+		Constant.camHeight = (int) videoCapture.get(org.opencv.videoio.Videoio.CAP_PROP_FRAME_HEIGHT);
+		
+
 		while(par.running) {
-			Mat frame = new Mat();
-			camera.read(frame);
-			if(!frame.empty()) {
-				par.camQueue.add(frame);
-				par.frame = frame;
-				System.out.println("CAM: Đọc frame thành công!");
+			try { 
+				Mat frame = new Mat();
+				videoCapture.read(frame); 
+				
+				if (!frame.empty()) {
+					par.camQueue.add(frame); 
+				}
+				
+				Thread.sleep(30); 
+				
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
-		System.out.println("!!! Đã giải phóng camera."); // <-- THÊM DÒNG NÀY
-		camera.release();
 	}
 }

@@ -8,6 +8,8 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import org.opencv.core.Size;
+
 import Client.Constant;
 
 public class LiveThread extends Thread {
@@ -39,7 +41,7 @@ public class LiveThread extends Thread {
 					if (msg.startsWith("H1") && !isFocusScreen) {
 						if (isFocusCam) {
 							isFocusCam = false;
-//							par.camDim = new Size(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
+							par.camDim = new Size(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
 						}
 						isFocusScreen = true;
 						par.handleFocus(Constant.FOCUS_WIDTH, Constant.FOCUS_HEIGHT);
@@ -49,7 +51,7 @@ public class LiveThread extends Thread {
 							par.handleFocus(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
 						}
 						isFocusCam = true;
-//						par.camDim = new Size(Constant.FOCUS_WIDTH, Constant.FOCUS_HEIGHT);
+						par.camDim = new Size(Constant.FOCUS_WIDTH, Constant.FOCUS_HEIGHT);
 					} else if (msg.startsWith("~H")) {
 						if (isFocusScreen) {
 							isFocusScreen = false;
@@ -57,7 +59,7 @@ public class LiveThread extends Thread {
 						}
 						if (isFocusCam) {
 							isFocusCam = false;
-//							par.camDim = new Size(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
+							par.camDim = new Size(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
 						}
 
 					} else if (msg.startsWith("M")) {
@@ -66,6 +68,24 @@ public class LiveThread extends Thread {
 					} else if (msg.startsWith("Q")) {
 						par.running = false;
 						break;
+					}else if (msg.startsWith("ALERT:")) {
+						String alertMsg = msg.substring(6).trim(); 
+						
+						if (alertMsg.equalsIgnoreCase("KICK")) {
+							javax.swing.JOptionPane.showMessageDialog(null, 
+								"Bạn đã bị Giám thị trục xuất khỏi phòng thi!", 
+								"ĐÃ BỊ KICK", 
+								javax.swing.JOptionPane.ERROR_MESSAGE);
+							
+							par.running = false; 
+                            break; 
+
+						} else {
+							javax.swing.JOptionPane.showMessageDialog(null, 
+								alertMsg, 
+								"CẢNH BÁO TỪ GIÁM THỊ", 
+								javax.swing.JOptionPane.WARNING_MESSAGE);
+						}
 					}
 				}
 

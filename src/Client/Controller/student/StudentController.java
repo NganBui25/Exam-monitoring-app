@@ -25,8 +25,6 @@ public class StudentController extends InContestBaseController {
 	 public Queue<BufferedImage> screenQueue = new ConcurrentLinkedQueue<>();
 	 public Queue<Mat> camQueue = new ConcurrentLinkedQueue<>();
 	 public Size camDim = new Size(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
-	 public Mat camImg = new Mat();
-	 public Mat frame = new Mat();
 	 public String currKeys = "";
 	
 	 public StudentController() {
@@ -76,14 +74,11 @@ public class StudentController extends InContestBaseController {
 	     view.dispose();
 	     new Home().setVisible(true);
 	 }
-	//Thay đổi độ phân giải của hình ảnh 
 	public void handleFocus(int width, int height) {
-		//Tạo ra 1 khung ảnh mới có kích thước width, height
 		ScreenImageDTO img = new ScreenImageDTO(width, height);
 		ScreenImageDTO curr = imgModel; // Lưu lại khung ảnh cũ thành curr
 		imgModel = img; // Thay thế khung ảnh 
-		curr.g2d.dispose(); //Dọn dẹp tài nguyên của khung ảnh cũ để tránh rò rỉ bộ nhớ
-		this.camDim = new Size(width, height);
+		curr.g2d.dispose(); 
 	}
 	 public void back() {
 	     view.dispose();

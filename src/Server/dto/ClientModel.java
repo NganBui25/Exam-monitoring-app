@@ -1,8 +1,12 @@
 package Server.dto;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class ClientModel {
 	private long time;
 	private int studentNum;
+	private Queue<String> warnings = new LinkedList<>();
 
 	public ClientModel(int studentNum) {
 		super();
@@ -25,5 +29,11 @@ public class ClientModel {
 	public void setStudentNum(int studentNum) {
 		this.studentNum = studentNum;
 	}
+	public Queue<String> getWarnings() {
+		return warnings;
+	}
 
+	public void addWarning(String message) {
+		this.warnings.add(message);
+	}
 }
