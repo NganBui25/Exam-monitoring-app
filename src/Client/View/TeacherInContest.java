@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridLayout; // Sẽ dùng GridLayout
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -20,11 +18,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane; // Thêm JTabbedPane
-import javax.swing.SwingConstants;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
 
 import Client.Controller.Teacher.TeacherController;
 import Client.View.Utils.ChatPanel;
@@ -32,246 +28,166 @@ import Client.View.Utils.LogPanel;
 
 public class TeacherInContest extends JFrame {
 
-    public TeacherController controller;
-    
-    // Sửa lại: Chúng ta sẽ dùng một Panel tùy chỉnh cho mỗi camera
-    // để quản lý cả ảnh và tên
-    public ArrayList<CameraPanel> cameraPanels = new ArrayList<>();
-    
-    public JPanel camerasGridPanel; // Panel dùng GridLayout
-    public ChatPanel chatPn;
-    public LogPanel keyPn;
+	public TeacherController controller;
+	
+	public ArrayList<JLabel> cameraScreens = new ArrayList<JLabel>();
+	public JPanel cameras;
+	public ChatPanel chatPn;
+	public LogPanel keyPn;
 
-    public TeacherInContest(TeacherController controller) {
-        this.controller = controller;
-        Components(); // Xây dựng giao diện mới
-    }
+	public TeacherInContest(TeacherController controller) {
+		this.controller = controller;
+		setLayout(new BorderLayout());
 
-    private void Components() {
-        setLayout(new BorderLayout());
+		JPanel topPn = new JPanel(new BorderLayout()); // Đổi sang BorderLayout
+		topPn.setBackground(new Color(45, 62, 80)); // Màu xanh đậm
+
+		JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
+		titlePanel.setOpaque(false); // Làm trong suốt để lấy nền của topPn
+
+		JLabel contestLabel = new JLabel("Kỳ thi: " + controller.name);
+		contestLabel.setForeground(Color.WHITE); // Chữ trắng
+		titlePanel.add(contestLabel);
+
+		JLabel roomLabel = new JLabel("Mã phòng: " + controller.roomId);
+		roomLabel.setForeground(Color.WHITE); // Chữ trắng
+		titlePanel.add(roomLabel);
+		
+		topPn.add(titlePanel, BorderLayout.WEST);
+
+		JButton ketthuc = new JButton("Kết thúc giám sát");
+		styleDangerButton(ketthuc);
+		ketthuc.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				controller.endStream();
+			}
+		});
+		
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+		buttonPanel.setOpaque(false);
+		buttonPanel.add(ketthuc);
+		topPn.add(buttonPanel, BorderLayout.EAST); 
+		
+		JScrollPane mainPn = new JScrollPane();
+		cameras = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
+		cameras.setPreferredSize(new Dimension(500, 10000));
+		cameras.setBackground(new Color(236, 236, 236)); // Màu xám nhạt như trong ảnh
+		mainPn.setViewportView(cameras);
+		mainPn.setBorder(null);
+		
+		JPanel rightPn = new JPanel(new BorderLayout());
+		rightPn.setPreferredSize(new Dimension(350, 1000));
+		keyPn = new LogPanel("Keyboard");
+		rightPn.add(keyPn, BorderLayout.CENTER);
+		chatPn = new ChatPanel(controller);
+		rightPn.add(chatPn, BorderLayout.SOUTH);
+
+		add(mainPn, BorderLayout.CENTER);
+		add(topPn, BorderLayout.NORTH); // Thêm top panel mới
+		add(rightPn, BorderLayout.EAST);
+
+		setExtendedState(JFrame.MAXIMIZED_BOTH);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setVisible(true);
+	}
+
+	public void addCameraScreen() {
+		JLabel cameraScreen = new JLabel();
+		cameraScreen.setBorder(new LineBorder(Color.BLACK, 1));
+		cameraScreen.setHorizontalTextPosition(JLabel.CENTER);
+		cameraScreen.setVerticalTextPosition(JLabel.TOP);
+
+		cameraScreens.add(cameraScreen);
+		cameras.add(cameraScreen);
+		cameraScreen.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				int panelIndex = cameraScreens.indexOf(cameraScreen);
+				int studentNum = panelIndex/2;
+				if(e.getButton() == MouseEvent.BUTTON1) {
+					controller.focus(panelIndex);
+				}
+				if(e.getButton() == MouseEvent.BUTTON3) {
+					showKickMenu(e, studentNum);
+				}
+			}
+		});
+	}
+	private void showKickMenu(MouseEvent e, int studentNum) {
+		JPopupMenu contextMenu = new JPopupMenu();
+		String studentName = "Thí sinh" + studentNum;
+		try {
+			String fullText = cameraScreens.get(studentNum * 2).getText();
+			studentName = fullText.substring(fullText.indexOf('.') + 2, fullText.indexOf(" -"));
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		}
+		JMenuItem warnItem = new JMenuItem("Cảnh báo " + studentName);
+        warnItem.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        warnItem.setForeground(new Color(230, 126, 34)); // Màu cam
         
-        // --- 1. HEADER (NORTH) ---
-        // Thanh header màu tối, hiện đại
-        JPanel headerPanel = new JPanel(new BorderLayout(20, 0));
-        headerPanel.setBackground(new Color(45, 55, 75)); // Màu xanh đậm/tối
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 25, 15, 25));
-
-        // Tên phòng thi
-        JLabel titleLabel = new JLabel(
-            "<html><b>Kỳ thi:</b> " + controller.name + 
-            "&nbsp;&nbsp;&nbsp;&nbsp;<b>Mã phòng:</b> " + controller.roomId + "</html>"
-        );
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titleLabel.setForeground(Color.WHITE);
-        headerPanel.add(titleLabel, BorderLayout.CENTER);
-
-        // Nút "Kết thúc"
-        JButton endButton = new JButton("Kết thúc Giám sát");
-        styleDangerButton(endButton); // Style nút màu đỏ
-        endButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                controller.endStream();
+        warnItem.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		String message = "Bạn đang vi phạm quy chế thi! Yêu cầu nghiêm túc làm bài";
+        		controller.warnStudent(studentNum, message);
+        	}
+        });
+        contextMenu.add(warnItem);
+        contextMenu.addSeparator();
+        
+        JMenuItem kickItem = new JMenuItem("Kick (Đuổi) " + studentName);
+        kickItem.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        kickItem.setForeground(Color.RED);
+        
+        kickItem.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent ae) {
+                controller.deleteStudent(studentNum);
             }
         });
-        headerPanel.add(endButton, BorderLayout.EAST);
+        contextMenu.add(kickItem);
+        contextMenu.show(e.getComponent(), e.getX(), e.getY());
+	}
 
-        add(headerPanel, BorderLayout.NORTH);
-
-        // --- 2. KHU VỰC LOGS (EAST) ---
-        // Dùng JTabbedPane để chứa Chat và Keylog
-        JTabbedPane logsTabbedPane = new JTabbedPane();
-        logsTabbedPane.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        logsTabbedPane.setPreferredSize(new Dimension(350, 1000));
-
-        // Tạo LogPanel (từ code cũ của bạn)
-        keyPn = new LogPanel("Keyboard Log");
-        logsTabbedPane.addTab("Keylog", keyPn);
-
-        // Tạo ChatPanel (từ code cũ của bạn)
-        chatPn = new ChatPanel(controller);
-        logsTabbedPane.addTab("Chat Giám thị", chatPn);
-
-        add(logsTabbedPane, BorderLayout.EAST);
-
-        // --- 3. KHU VỰC CAMERA (CENTER) ---
-        // Dùng GridLayout để các camera thẳng hàng
-        // (0 hàng, 3 cột, khoảng cách 15px)
-        camerasGridPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
-        camerasGridPanel.setBackground(new Color(230, 230, 230)); 
-
-        JPanel wrapperPanel = new JPanel(new BorderLayout());
-        wrapperPanel.setBackground(new Color(230, 230, 230)); // Đặt màu nền cho wrapper
-        wrapperPanel.add(camerasGridPanel, BorderLayout.NORTH);
-
-        // Thêm JScrollPane để có thể cuộn
-        JScrollPane mainScrollPane = new JScrollPane(wrapperPanel); // Cuộn wrapperPanel
-        mainScrollPane.setBorder(null);
-        mainScrollPane.getVerticalScrollBar().setUnitIncrement(16); 
-
-        add(mainScrollPane, BorderLayout.CENTER);
-
-        // --- Cài đặt Frame ---
-        setExtendedState(JFrame.MAXIMIZED_BOTH); 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
-    }
-
-    /**
-     * Hàm này thêm một "CameraPanel" (tùy chỉnh) vào lưới
-     */
-    public void addCameraScreen() {
-        CameraPanel newCamPanel = new CameraPanel(cameraPanels.size());
-        
-        // Thêm sự kiện click (lấy từ code cũ)
-        newCamPanel.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                controller.focus(newCamPanel.getPanelIndex());
-            }
-        });
-        
-        cameraPanels.add(newCamPanel);
-        camerasGridPanel.add(newCamPanel);
-        
-        // Cập nhật UI
-        camerasGridPanel.revalidate();
-        camerasGridPanel.repaint();
-    }
-
-    public void removeCameraScreen(int studentNum) {
-        if (studentNum < cameraPanels.size() && cameraPanels.get(studentNum) != null) {
-            camerasGridPanel.remove(cameraPanels.get(studentNum));
-            cameraPanels.set(studentNum, null); 
-            
-            // Cập nhật UI
-            camerasGridPanel.revalidate();
-            camerasGridPanel.repaint();
-        }
-    }
-    
-    public void setImage(byte[] img, int cameraNum) {
-        while (cameraNum >= cameraPanels.size()) {
-            addCameraScreen();
-        }
-        CameraPanel panel = cameraPanels.get(cameraNum);
-        if (panel != null) {
-            panel.setImageIcon(new ImageIcon(img));
-        }
-    }
-    
-    public void addStudent(int studentNum, String name) {
-        // Cần 2 panel (Screen và Cam)
-        while (studentNum * 2 + 1 >= cameraPanels.size()) {
-            addCameraScreen();
-        }
-        // Gán tên cho 2 panel
-        cameraPanels.get(studentNum * 2).setNameText(studentNum + ". " + name + " - Màn hình");
-        cameraPanels.get(studentNum * 2 + 1).setNameText(studentNum + ". " + name + " - Facecam");
-    }
-    
-    public void deleteStudent(int studentNum) {
-        // Xóa 2 panel
-        removeCameraScreen(studentNum * 2);
-        removeCameraScreen(studentNum * 2 + 1);
-    }
-    
-    public void addText(String txt) {
-        chatPn.addText(txt);
-    }
-    
-    public void addKeyLog(int studentNum, String duration, String keys) {
-        // Logic lấy tên được cập nhật để dùng panel mới
-        if (studentNum * 2 < cameraPanels.size() && cameraPanels.get(studentNum * 2) != null) {
-            String cameraText = cameraPanels.get(studentNum * 2).getNameText(); // Lấy tên từ panel
-            
-            // Logic parse tên (giữ từ code cũ của bạn)
-            int i = cameraText.indexOf(' ');
-            int j = cameraText.indexOf(' ', i + 1);
-            if (i != -1 && j != -1) {
-                String namePart = cameraText.substring(i + 1, j);
-                String msg = duration + ": " + studentNum + ". " + namePart + " has typed: " + keys;
-                keyPn.addText(msg);
-            }
-        }
-    }
-    
-    // --- CÁC HÀM TIỆN ÍCH UI MỚI ---
-    
-    private void styleDangerButton(JButton button) {
+	public void removeCameraScreen(int studentNum) {
+		cameras.remove(cameraScreens.get(studentNum));
+		repaint();
+	}
+	
+	public void setImage(byte[] img, int cameraNum) {
+		while(cameraNum >= cameraScreens.size()) addCameraScreen();
+		JLabel screen = cameraScreens.get(cameraNum);
+		screen.setIcon(new ImageIcon(img));
+	}
+	
+	public void addStudent(int studentNum, String name) {
+		while (studentNum * 2 + 1 >= cameraScreens.size())
+			addCameraScreen();
+		cameraScreens.get(studentNum * 2).setText(studentNum + ". " + name + " - MH");
+		cameraScreens.get(studentNum * 2 + 1).setText(studentNum + ". " + name + " - Face cam");
+	}
+	
+	public void deleteStudent(int studentNum) {
+		removeCameraScreen(studentNum * 2);
+		removeCameraScreen(studentNum * 2 + 1);
+	}
+	
+	public void addText(String txt) {
+		chatPn.addText(txt);
+	}
+	
+	public void addKeyLog(int studentNum, String duration, String keys) {
+		String cameraText = cameraScreens.get(studentNum * 2).getText();
+		int i = cameraText.indexOf(' ');
+		int j = cameraText.indexOf(' ', i + 1);
+		String msg = duration + ": " + studentNum + ". " + cameraText.substring(i + 1, j) + " has typed: " + keys;
+		keyPn.addText(msg);
+	}
+	private void styleDangerButton(JButton button) {
         button.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        button.setBackground(new Color(220, 53, 69)); // Màu đỏ
+        button.setBackground(new Color(220, 53, 69)); 
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
         button.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-    }
-
-    /**
-     * Một lớp nội (inner class) để quản lý
-     * một ô camera (gồm ảnh và tên).
-     */
-    private class CameraPanel extends JPanel {
-        private JLabel imageLabel;
-        private JLabel nameLabel;
-        private int panelIndex;
-        
-        public CameraPanel(int index) {
-            this.panelIndex = index;
-            setLayout(new BorderLayout());
-            setBorder(new LineBorder(Color.BLACK, 1));
-            setBackground(Color.WHITE);
-            
-            setPreferredSize(new Dimension(300,300));
-            // 1. Khu vực hiển thị ảnh
-            imageLabel = new JLabel();
-            imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            imageLabel.setVerticalAlignment(SwingConstants.CENTER);
-            imageLabel.setOpaque(true);
-            imageLabel.setBackground(Color.DARK_GRAY);
-            
-            // 2. Khu vực hiển thị tên
-            nameLabel = new JLabel("Đang chờ kết nối...");
-            nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-            nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            nameLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-            nameLabel.setOpaque(true);
-            nameLabel.setBackground(Color.LIGHT_GRAY);
-
-            add(imageLabel, BorderLayout.CENTER);
-            add(nameLabel, BorderLayout.SOUTH);
-        }
-        
-        public int getPanelIndex() {
-            return panelIndex;
-        }
-        
-        public void setImageIcon(ImageIcon icon) {
-			Image img = icon.getImage();
-            
-            // Lấy kích thước của imageLabel (phần màu xám)
-            int width = imageLabel.getWidth();
-            int height = imageLabel.getHeight();
-            
-            // Nếu panel chưa được vẽ, width/height sẽ là 0.
-            // Chúng ta dùng kích thước mong muốn trừ đi tên
-            if (width == 0 || height == 0) {
-                width = 320; 
-                height = 280 - 40; // Giả sử nameLabel cao 40px
-            }
-
-            // Resize ảnh
-            Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            
-            imageLabel.setIcon(new ImageIcon(scaledImg));
-            imageLabel.setText(null); // Xóa text chờ
-        }
-        
-        public void setNameText(String text) {
-            nameLabel.setText(text);
-        }
-        
-        public String getNameText() {
-            return nameLabel.getText();
-        }
     }
 }

@@ -31,13 +31,11 @@ public class ViewThread extends Thread {
 						//Lắp rắp ảnh
 						byte[] completeData = assemblePackets(tmp.getData());
 						par.setImage(completeData, i);
-						System.out.println(System.nanoTime() - start);
 					}
 				}
 				try {
 				Thread.sleep(1);
 				} catch (InterruptedException e) {
-					//TODO Auto-generated catch block
 					e.printStackTrace();
 			}
 			} catch (NullPointerException e) {

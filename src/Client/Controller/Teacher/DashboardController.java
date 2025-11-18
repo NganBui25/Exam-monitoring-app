@@ -19,7 +19,7 @@ import Client.commom.DTO.OutContest.User;
 import Client.commom.Util.Service;
 import Client.View.Home;
 import Client.View.TeacherDashboard;
-//import Client.view.KeyLog.KeyLog;
+import Client.View.KeyLog.KeyLog;
 
 public class DashboardController {
 	public User user;
@@ -128,54 +128,9 @@ public class DashboardController {
 				DataOutputStream dos = new DataOutputStream(soc.getOutputStream())) {
 			dos.writeUTF(msg);
 			String receiveMsg = dis.readUTF();
-		//	new KeyLog(receiveMsg);
+			new KeyLog(receiveMsg);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-
-//	public void requestVideoFile(int participant_id) {
-//	    try (Socket tcpSocket = new Socket(Constant.serverAddress, Constant.tcpPort);
-//	         DataOutputStream dos = new DataOutputStream(tcpSocket.getOutputStream());
-//	         DataInputStream dis = new DataInputStream(tcpSocket.getInputStream())) {
-//
-//	        // 1. Gửi yêu cầu (G<participant_id>)
-//	        dos.writeUTF("G" + participant_id);
-//	        
-//	        // 2. Chờ Server phản hồi
-//	        String response = dis.readUTF();
-//	        
-//	        if (response.equals("YES")) {
-//	            // Server báo "CÓ FILE"
-//	            long fileSize = dis.readLong(); // Nhận kích thước file
-//	            
-//	            String savePath = System.getProperty("user.home") + "/Downloads/video_" + participant_id + ".mp4";
-//	            File videoFile = new File(savePath);
-//	            
-//	            // 4. Nhận và Ghi file
-//	            try (FileOutputStream fos = new FileOutputStream(videoFile)) {
-//	                byte[] buffer = new byte[8192]; // Bộ đệm 8KB
-//	                int count;
-//	                long received = 0;
-//	                
-//	                while (received < fileSize && (count = dis.read(buffer, 0, (int) Math.min(buffer.length, fileSize - received))) != -1) {
-//	                    fos.write(buffer, 0, count);
-//	                    received += count;
-//	                }
-//	            }
-//	            
-//	            // 5. Mở file video vừa tải về
-//	            JOptionPane.showMessageDialog(null, "Đã tải video thành công! Đang mở video...");
-//	            java.awt.Desktop.getDesktop().open(videoFile);
-//	            
-//	        } else {
-//	            // Server báo "KHÔNG CÓ FILE"
-//	            JOptionPane.showMessageDialog(null, "Không tìm thấy file video cho thí sinh này.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-//	        }
-//
-//	    } catch (Exception e) {
-//	        e.printStackTrace();
-//	        JOptionPane.showMessageDialog(null, "Lỗi khi tải file video.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-//	    }
-//	}
 }

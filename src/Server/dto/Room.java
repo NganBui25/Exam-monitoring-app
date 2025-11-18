@@ -135,5 +135,12 @@ public class Room {
 	public void setKeys(Queue<String> keys) {
 		this.keys = keys;
 	}
-
+	public ClientModel getStudentByNum(int studentNum) {
+        for (ClientModel student : students.values()) {
+            if (student.getStudentNum() == studentNum) {
+                return student; 
+            }
+        }
+        return null; 
+    }
 }

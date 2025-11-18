@@ -63,8 +63,6 @@ public class StudentController extends InContestBaseController {
 			new CaptureThread(this, false).start();
 			new SendThread(this, true).start();
 			new SendThread(this, false).start();
-//			new SaveVideoThread(this, true).start();
-//			new SaveVideoThread(this, false).start();
 			new LiveThread(this).start();
 		}
 	
@@ -76,14 +74,11 @@ public class StudentController extends InContestBaseController {
 	     view.dispose();
 	     new Home().setVisible(true);
 	 }
-	//Thay đổi độ phân giải của hình ảnh 
 	public void handleFocus(int width, int height) {
-		//Tạo ra 1 khung ảnh mới có kích thước width, height
 		ScreenImageDTO img = new ScreenImageDTO(width, height);
 		ScreenImageDTO curr = imgModel; // Lưu lại khung ảnh cũ thành curr
 		imgModel = img; // Thay thế khung ảnh 
-		curr.g2d.dispose(); //Dọn dẹp tài nguyên của khung ảnh cũ để tránh rò rỉ bộ nhớ
-		this.camDim = new Size(width, height);
+		curr.g2d.dispose(); 
 	}
 	 public void back() {
 	     view.dispose();

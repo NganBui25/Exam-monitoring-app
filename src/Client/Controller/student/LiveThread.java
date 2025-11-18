@@ -58,7 +58,8 @@ public class LiveThread extends Thread {
 							par.handleFocus(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
 						}
 						if (isFocusCam) {
-							isFocusCam = false;							par.camDim = new Size(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
+							isFocusCam = false;
+							par.camDim = new Size(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
 						}
 
 					} else if (msg.startsWith("M")) {
@@ -67,6 +68,24 @@ public class LiveThread extends Thread {
 					} else if (msg.startsWith("Q")) {
 						par.running = false;
 						break;
+					}else if (msg.startsWith("ALERT:")) {
+						String alertMsg = msg.substring(6).trim(); 
+						
+						if (alertMsg.equalsIgnoreCase("KICK")) {
+							javax.swing.JOptionPane.showMessageDialog(null, 
+								"Bạn đã bị Giám thị trục xuất khỏi phòng thi!", 
+								"ĐÃ BỊ KICK", 
+								javax.swing.JOptionPane.ERROR_MESSAGE);
+							
+							par.running = false; 
+                            break; 
+
+						} else {
+							javax.swing.JOptionPane.showMessageDialog(null, 
+								alertMsg, 
+								"CẢNH BÁO TỪ GIÁM THỊ", 
+								javax.swing.JOptionPane.WARNING_MESSAGE);
+						}
 					}
 				}
 

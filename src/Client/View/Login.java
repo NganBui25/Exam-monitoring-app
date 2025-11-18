@@ -137,9 +137,6 @@ public class Login extends javax.swing.JFrame {
         pack(); // Tối ưu kích thước
     }
 
-    // --- CÁC HÀM TIỆN ÍCH (HELPER) ĐỂ TÙY CHỈNH UI ---
-
-    // Tạo nhãn (Label)
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Segoe UI", Font.BOLD, 15));
@@ -192,5 +189,4 @@ public class Login extends javax.swing.JFrame {
         this.dispose();
     }
 
-    // Không cần hàm main() nếu bạn khởi động từ Home.java
 }

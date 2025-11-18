@@ -8,10 +8,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-/**
- * Giao diện Đăng ký (Đã thiết kế lại)
- * Tương thích với giao diện Login mới và tích hợp UserDAO
- */
 public class Register extends javax.swing.JFrame {
 
     // Khai báo các biến UI
@@ -173,12 +169,6 @@ public class Register extends javax.swing.JFrame {
         return button;
     }
 
-    // --- CÁC HÀM XỬ LÝ SỰ KIỆN ---
-
-    /**
-     * Hàm này được lấy trực tiếp từ code của bạn,
-     * chỉ đổi tên biến JPasswordField.
-     */
     private void btnRegisterActionPerformed(ActionEvent evt) {
         String username = txtUsername.getText();
         String password = new String(txtPassword.getPassword());
@@ -194,6 +184,10 @@ public class Register extends javax.swing.JFrame {
         if (!password.equals(confirmPassword)) {
             JOptionPane.showMessageDialog(this, "Mật khẩu không khớp. Vui lòng nhập lại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
+        }
+        
+        if (!validatePassword(password)) {
+            return; 
         }
         
         // 3. Gọi hàm register từ UserDAO
@@ -215,10 +209,38 @@ public class Register extends javax.swing.JFrame {
         new Login().setVisible(true);
         this.dispose();
     }
+	private boolean validatePassword(String password) {
+        if (password.length() <= 8) {
+            JOptionPane.showMessageDialog(this, 
+                "Mật khẩu phải dài hơn 8 ký tự.", 
+                "Lỗi Mật khẩu", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        
+        if (!password.matches(".*[A-Z].*")) {
+            JOptionPane.showMessageDialog(this, 
+                "Mật khẩu phải chứa ít nhất 1 chữ cái IN HOA.", 
+                "Lỗi Mật khẩu", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (!password.matches(".*[0-9].*")) {
+            JOptionPane.showMessageDialog(this, 
+                "Mật khẩu phải chứa ít nhất 1 chữ số.", 
+                "Lỗi Mật khẩu", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        
+        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
+            JOptionPane.showMessageDialog(this, 
+                "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (ví dụ: !@#$%).", 
+                "Lỗi Mật khẩu", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
+     }
     
     // --- Hàm Main (Để chạy test nếu cần) ---
     public static void main(String args[]) {
-        // Set Look and Feel (Nimbus)
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

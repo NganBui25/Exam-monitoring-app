@@ -1,6 +1,4 @@
 package Server.controller;
-//ifconfig | grep "inet " | grep -v 127.0.0.1
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -28,7 +26,7 @@ public class Server {
 	public static void main(String[] args) {
 		new Thread(new TCPServer()).start();
 		new Thread(new UDPServer()).start();
-		//new Thread(new CleanThread()).start();
+		new Thread(new CleanThread()).start();
 	}
 }
 

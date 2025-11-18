@@ -1,6 +1,7 @@
 package Client.View;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -55,7 +56,6 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
         cardLayout = new CardLayout();
         mainContainer = new JPanel(cardLayout);
 
-        // --- 3. Tạo 2 "Mặt" (Panel) ---
         JPanel panelJoin = createJoinPanel(); // Mặt 1: Form tham gia
         JPanel panelContest = createContestPanel(); // Mặt 2: Phòng thi
 
@@ -155,12 +155,10 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
                 String msg = controller.joinRoom(name, roomId);
 
                 if (msg != null) {
-                    // THÀNH CÔNG: Bắt đầu giám sát và lật sang Panel thi
                     startCapture(); // Đăng ký key hook và bắt đầu threads
                     teacherNameLabel.setText("Kỳ thi: " + msg); // Cập nhật tên kỳ thi
                     cardLayout.show(mainContainer, "CONTEST_PANEL"); // Lật
                 } else {
-                    // THẤT BẠI: Hiển thị cảnh báo
                     lbWarning.setVisible(true);
                     joinButton.setEnabled(true);
                     joinButton.setText("Tham gia");
@@ -171,14 +169,10 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
         return panel;
     }
 
-    /**
-     * Tạo Panel "Trong phòng thi" (chính)
-     */
     private JPanel createContestPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBackground(new Color(245, 245, 245)); // Nền xám nhạt
+        panel.setBackground(new Color(245, 245, 245)); 
 
-        // --- Phía Bắc (Header) ---
         JPanel topPanel = new JPanel(new BorderLayout(10, 10));
         topPanel.setBackground(new Color(60, 90, 150)); // Màu xanh đậm
         topPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
@@ -188,16 +182,31 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
         teacherNameLabel.setForeground(Color.WHITE);
         topPanel.add(teacherNameLabel, BorderLayout.WEST);
         
+        JPanel eastPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        eastPanel.setOpaque(false); 
+        
         statusLabel = new JLabel("TRẠNG THÁI: ĐANG GIÁM SÁT (SCREEN + CAM)");
         statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        statusLabel.setForeground(new Color(150, 255, 150)); // Màu xanh lá cây nhạt
-        topPanel.add(statusLabel, BorderLayout.EAST);
+        statusLabel.setForeground(new Color(150, 255, 150)); // Màu xanh lá
+        eastPanel.add(statusLabel); 
 
+        JButton leaveButton = new JButton("Rời phòng giám sát");
+        styleDangerButton(leaveButton); 
+        
+        leaveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.running = false; 
+            }
+        });
+        
+        eastPanel.add(leaveButton); 
+        
+        topPanel.add(eastPanel, BorderLayout.EAST);
         panel.add(topPanel, BorderLayout.NORTH);
 
-        // --- Phía Đông (Chat) ---
         chatPn = new ChatPanel(controller);
-        chatPn.setPreferredSize(new Dimension(300, 0)); // Set chiều rộng cho chat
+        chatPn.setPreferredSize(new Dimension(300, 0)); 
         panel.add(chatPn, BorderLayout.EAST);
 
         // --- Trung tâm (Thông báo) ---
@@ -209,8 +218,6 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
         
         return panel;
     }
-
-    // --- Các hàm tiện ích (từ Login/Register) ---
 
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
@@ -227,7 +234,6 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
             BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
     }
-    
     private void stylePrimaryButton(JButton button) {
         button.setFont(new Font("Segoe UI", Font.BOLD, 16));
         button.setPreferredSize(new Dimension(200, 50));
@@ -237,8 +243,6 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
         button.setBorder(null);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
-
-    // --- Các hàm Logic (Giữ nguyên) ---
 
     public void nativeKeyPressed(NativeKeyEvent e) {
         char c = NativeKeyEvent.getKeyText(e.getKeyCode()).charAt(0);
@@ -268,4 +272,12 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
     public void addText(String txt) {
 		chatPn.addText(txt);
 	}
+    private void styleDangerButton(JButton button) {
+        button.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        button.setBackground(new Color(220, 53, 69)); // Màu đỏ
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        button.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+    }
 }

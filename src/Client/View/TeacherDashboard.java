@@ -205,17 +205,15 @@ public class TeacherDashboard extends javax.swing.JFrame {
 				.setHorizontalGroup(
 						trangchuFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 								.addGroup(trangchuFormLayout.createSequentialGroup().addGap(234, 234, 234)
-										.addComponent(tencuocthi, javax.swing.GroupLayout.PREFERRED_SIZE, 350, // Tăng
-																												// chiều
-																												// rộng
+										.addComponent(tencuocthi, javax.swing.GroupLayout.PREFERRED_SIZE, 350, 
+												
 												javax.swing.GroupLayout.PREFERRED_SIZE)
 										.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-										.addComponent(trangchu_batdau, javax.swing.GroupLayout.PREFERRED_SIZE, 100, // Tăng
-																													// chiều
-																													// rộng
+										.addComponent(trangchu_batdau, javax.swing.GroupLayout.PREFERRED_SIZE, 100,
+												
 												javax.swing.GroupLayout.PREFERRED_SIZE)
-										.addContainerGap(180, Short.MAX_VALUE))); // Giảm containerGap để bù kích thước
-																					// tăng
+										.addContainerGap(180, Short.MAX_VALUE))); 
+		
 		trangchuFormLayout.setVerticalGroup(trangchuFormLayout
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 				.addGroup(trangchuFormLayout.createSequentialGroup().addGap(246, 246, 246)
@@ -374,47 +372,26 @@ public class TeacherDashboard extends javax.swing.JFrame {
 			cardLayout.show(mainPanel, "CTCT"); // Quay lại màn hình "CTCT"
 		});
 
-		// Tạo nút dạng "clip"
-		JButton clipButton = new JButton("Record screen"); // Biểu tượng clip
-		clipButton.setEnabled(true); // Bật nút lên
-
-		clipButton.addActionListener(e -> {
-		    if (participant_id == null) {
-		        JOptionPane.showMessageDialog(this, "Chưa chọn thí sinh.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-		        return;
-		    }
-		    
-		    // Yêu cầu Controller tải video này
-//		    teacherController.requestVideoFile(participant_id); 
-		});
-
 		// Tạo nút dạng "file txt"
 		JButton fileButton = new JButton("Keyboard log"); // Biểu tượng file txt
 		fileButton.addActionListener(e -> {
 			teacherController.showKeys(participant_id);
 		});
 
-		// Thiết lập bố cục ngang
 		detailFormLayout.setHorizontalGroup(detailFormLayout.createSequentialGroup().addContainerGap()
-				.addGroup(detailFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-						.addGroup(detailFormLayout.createSequentialGroup().addComponent(backButton1,
-								javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-						.addGroup(detailFormLayout.createSequentialGroup()
-								.addComponent(clipButton, javax.swing.GroupLayout.PREFERRED_SIZE, 100,
-										javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addComponent(fileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 50,
-										javax.swing.GroupLayout.PREFERRED_SIZE)))
-				.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
+		        .addGroup(detailFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+		                .addComponent(backButton1, // Nút Quay lại
+		                        javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+		                .addComponent(fileButton, 
+		                        javax.swing.GroupLayout.PREFERRED_SIZE, 150, // Tăng kích thước nút
+		                        javax.swing.GroupLayout.PREFERRED_SIZE)) 
+		        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
 
-		// Thiết lập bố cục dọc
 		detailFormLayout.setVerticalGroup(detailFormLayout.createSequentialGroup().addContainerGap()
-				.addComponent(backButton1).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-				.addGroup(detailFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-						.addComponent(clipButton).addComponent(fileButton))
-				.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
-
-		// Thêm form này vào mainPanel
+		        .addComponent(backButton1) // Nút Quay lại
+		        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+		        .addComponent(fileButton) 
+		        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
 		mainPanel.add(detailForm, "DetailForm");
 
 		getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);

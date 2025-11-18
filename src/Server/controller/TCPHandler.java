@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import Server.controller.SaveVideoThread;
 import Server.Constant;
 import Server.DAO.ParticipantDAO;
 import Server.DAO.TestDAO;
@@ -105,6 +104,13 @@ public class TCPHandler implements Runnable {
 			case 'Q': // Teacher bam nut ket thuc
 				endStream(message);
 				break;
+			case 'W':
+				handlerWarning(message);
+				break;
+			
+			case 'X': // Lệnh Kick (Trục xuất)
+                handleKick(message);
+                break;
 
 //			case 'V': // luu video
 //				saveVideo(message, input);
@@ -127,6 +133,40 @@ public class TCPHandler implements Runnable {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void handleKick(String msg) {
+		try {
+			int i = msg.indexOf(" ");
+			int roomId = Integer.valueOf(msg.substring(1, i));
+			int studentNum = Integer.valueOf(msg.substring(i + 1));
+			
+			Room room = Server.rooms.get(roomId);
+			if (room != null) {
+                ClientModel student = room.getStudentByNum(studentNum);
+				if (student != null) {
+					System.out.println(">>> [SERVER-DEBUG] Đã thêm 'KICK' vào hàng đợi của Student: " + studentNum);
+                    student.addWarning("KICK");
+                }
+                
+                room.getQuittedStudents().add(studentNum);
+			}
+		} catch (Exception e) { e.printStackTrace(); }
+		
+	}
+
+	private void handlerWarning(String msg) {
+		try {
+			int i = msg.indexOf(" ");
+			int j = msg.indexOf(" ", i + 1);
+	        int roomId = Integer.valueOf(msg.substring(1, i));
+	        int studentNum = Integer.valueOf(msg.substring(i + 1, j));
+	        String text = msg.substring(j + 1);
+	        Room room = Server.rooms.get(roomId);
+	        if (room != null) {
+	            room.getStudentByNum(studentNum).addWarning(text); 
+	        }
+	    } catch (Exception e) { e.printStackTrace(); }
 	}
 
 	private int createRoom(String msg) {
@@ -190,7 +230,8 @@ public class TCPHandler implements Runnable {
 		if (room != null) {
 			int studentId = Integer.parseInt(message.substring(i + 1, j));
 			int msgNum = Integer.parseInt(message.substring(j + 1));
-			room.getStudents().get(studentId).setTime(System.currentTimeMillis());
+			ClientModel student = room.getStudents().get(studentId);
+		    student.setTime(System.currentTimeMillis());
 
 			if (studentId * 2 == room.getFocusAddress()) {
 				dos.writeUTF("H1");
@@ -203,6 +244,10 @@ public class TCPHandler implements Runnable {
 				dos.writeUTF("M" + chatHistory.get(msgNum));
 				msgNum++;
 			}
+			Queue<String> warnings = student.getWarnings(); 
+		    while (!warnings.isEmpty()) {
+		        dos.writeUTF("ALERT:" + warnings.poll()); 
+		    }
 			dos.writeUTF("E");
 		} else
 			dos.writeUTF("Q");
@@ -332,73 +377,4 @@ public class TCPHandler implements Runnable {
 		Server.rooms.remove(Integer.valueOf(message.substring(1)));
 	}
 
-//	private void saveVideo(String message, DataInputStream input) {
-//		int length = 0, width = 0, height = 0;
-//		try {
-//			width = input.readInt();
-//			height = input.readInt();
-//			length = input.readInt();
-//		} catch (Exception ex) {
-//			ex.printStackTrace();
-//		}
-//
-//		String splitMsg[] = message.split(",");
-//		int typeVideo = Integer.parseInt(splitMsg[1]);
-//		String participant_id = splitMsg[2];
-//		Queue<byte[]> imageBytes = new ConcurrentLinkedQueue<byte[]>();
-//		new SaveVideoThread(imageBytes, length, typeVideo, participant_id, width, height).start();;
-//		for (int i = 0; i < length; i++) {
-//			try {
-//				int bytesLength = input.readInt();
-//				if (bytesLength > 0) {
-//					byte[] receiveImageBytes = new byte[bytesLength];
-//
-//					input.readFully(receiveImageBytes);
-//
-//					imageBytes.add(receiveImageBytes);
-//				}
-//			} catch (IOException ex) {
-//				ex.printStackTrace();
-//				break;
-//			}
-//		}
-//	}
-
-//	private void handleGetVideoRequest(String participant_id_str, DataOutputStream dos) throws IOException {
-//	    
-//	    String screenPath = Constant.FILE_LOCATION + File.separator + "Record-Screen" + 
-//	                        File.separator + participant_id_str + File.separator + "output.mp4";
-//	    
-//	    String camPath = Constant.FILE_LOCATION + File.separator + "Record-Cam" + 
-//	                     File.separator + participant_id_str + File.separator + "output.mp4";
-//	    
-//	    File videoFile = new File(screenPath); // Ưu tiên video màn hình
-//	    if (!videoFile.exists()) {
-//	        videoFile = new File(camPath); // Nếu không có, tìm video camera
-//	    }
-//
-//	    if (videoFile.exists()) {
-//	        // 1. Báo cho Client "CÓ FILE"
-//	        dos.writeUTF("YES");
-//	        
-//	        // 2. Gửi kích thước file (kiểu Long)
-//	        dos.writeLong(videoFile.length());
-//	        
-//	        // 3. Đọc file và Gửi dữ liệu (stream)
-//	        try (java.io.FileInputStream fis = new java.io.FileInputStream(videoFile)) {
-//	            byte[] buffer = new byte[8192];
-//	            int count;
-//	            while ((count = fis.read(buffer)) != -1) {
-//	                dos.write(buffer, 0, count);
-//	            }
-//	        }
-//	        dos.flush();
-//	        System.out.println("Đã gửi file video " + videoFile.getName() + " cho Giám thị.");
-//	        
-//	    } else {
-//	        // 1. Báo cho Client "KHÔNG CÓ FILE"
-//	        dos.writeUTF("NO");
-//	        System.out.println("Giám thị yêu cầu video cho " + participant_id_str + " nhưng không tìm thấy file.");
-//	    }
-//	}
 }

@@ -61,12 +61,6 @@ public class SendThread extends Thread {
 					}
 				}
 				currImg = (currImg + 1) % (isScreen ? Constant.MAX_SCREENS : Constant.MAX_CAMS);
-				System.out.println(System.nanoTime() - start);
-				if(isScreen) {
-	                System.out.println("Gửi SCREEN: " + (System.nanoTime() - start));
-	            } else {
-	                System.out.println("Gửi CAMERA: " + (System.nanoTime() - start));
-	            }
 				Thread.sleep(20);
 			} catch (Exception ex) {
 			}
@@ -88,8 +82,6 @@ public class SendThread extends Thread {
 			Imgproc.resize(frame, resizedFrame, par.camDim);
 			
 			Imgcodecs.imencode(".jpg", resizedFrame, mob);
-			
-			frame.release(); 
 			
 			return mob.toArray();
 		}
