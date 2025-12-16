@@ -1,15 +1,13 @@
 package Client.Controller;
-
 import java.io.DataInputStream;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
 import Client.Constant;
 import Client.Controller.Teacher.DashboardController;
-import Client.commom.DTO.OutContest.User;
 import Client.commom.Util.Service;
+import commom.model.User;
 
 public class AuthenticationController {
 
@@ -35,7 +33,7 @@ public class AuthenticationController {
 		}
 		if (receiveMsg != null && receiveMsg.charAt(0) == 'Y') {
 			int user_id = Integer.parseInt(receiveMsg.split(",")[1]);
-			new DashboardController(new User(user_id, username, password));//Chuyển sang controller của gv khi đăng nhập thành công
+			new DashboardController(new User(user_id, username, password));
 			return true;
 		} else {
 			Service.showAlert(code == 'L' ? "Bạn nhập sai mật khẩu hoặc tài khoản" : "Tài khoản đã tồn tại", "Thông báo lỗi");

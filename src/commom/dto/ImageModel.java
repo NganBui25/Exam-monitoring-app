@@ -1,7 +1,9 @@
-package Client.commom.DTO.InContest.Teacher;
+package commom.dto;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import commom.model.Packet;
 
 public class ImageModel {
 	private int total;

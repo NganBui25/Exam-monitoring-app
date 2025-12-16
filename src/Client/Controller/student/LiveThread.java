@@ -1,5 +1,4 @@
 package Client.Controller.student;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -7,6 +6,8 @@ import java.net.Socket;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+
+import javax.swing.JOptionPane;
 
 import org.opencv.core.Size;
 
@@ -50,8 +51,7 @@ public class LiveThread extends Thread {
 							isFocusScreen = false;
 							par.handleFocus(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
 						}
-						isFocusCam = true;
-						par.camDim = new Size(Constant.FOCUS_WIDTH, Constant.FOCUS_HEIGHT);
+						isFocusCam = true;						par.camDim = new Size(Constant.FOCUS_WIDTH, Constant.FOCUS_HEIGHT);
 					} else if (msg.startsWith("~H")) {
 						if (isFocusScreen) {
 							isFocusScreen = false;
@@ -68,26 +68,24 @@ public class LiveThread extends Thread {
 					} else if (msg.startsWith("Q")) {
 						par.running = false;
 						break;
-					}else if (msg.startsWith("ALERT:")) {
-						String alertMsg = msg.substring(6).trim(); 
-						
-						if (alertMsg.equalsIgnoreCase("KICK")) {
-							javax.swing.JOptionPane.showMessageDialog(null, 
-								"Bạn đã bị Giám thị trục xuất khỏi phòng thi!", 
-								"ĐÃ BỊ KICK", 
-								javax.swing.JOptionPane.ERROR_MESSAGE);
-							
-							par.running = false; 
-                            break; 
-
-						} else {
-							javax.swing.JOptionPane.showMessageDialog(null, 
-								alertMsg, 
-								"CẢNH BÁO TỪ GIÁM THỊ", 
-								javax.swing.JOptionPane.WARNING_MESSAGE);
-						}
 					}
-				}
+					else if (msg.startsWith("ALERT:")) {
+                        String warningContent = msg.substring(6); // Lấy nội dung sau chữ ALERT:
+                        
+                        if (warningContent.equals("KICK")) {
+                            // 1. Thông báo cho sinh viên biết lý do
+                            JOptionPane.showMessageDialog(par.view, 
+                                "Bạn đã bị giáo viên trục xuất khỏi phòng thi!", 
+                                "Thông báo", 
+                                JOptionPane.ERROR_MESSAGE);
+                            
+                            par.running = false;
+                        } else {
+                            // Nếu là cảnh báo thường (ví dụ: mất trật tự) thì chỉ hiện thông báo
+                            par.view.showWarning(warningContent);
+                        }
+                    }
+                }
 
 			} catch (IOException e) {
 				e.printStackTrace();

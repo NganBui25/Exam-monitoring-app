@@ -1,4 +1,4 @@
-package Server.dto;
+package commom.dto;
 
 import java.util.LinkedList;
 import java.util.Queue;

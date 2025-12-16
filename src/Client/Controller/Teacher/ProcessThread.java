@@ -1,11 +1,11 @@
 package Client.Controller.Teacher;
+
 import java.util.ArrayList;
 
 import Client.Constant;
-import Client.commom.DTO.InContest.Teacher.ImageModel;
-import Client.commom.DTO.InContest.Teacher.Packet;
+import commom.dto.ImageModel;
+import commom.model.Packet;
 
-//Lấy các dữ liệu ảnh từ hàng đợi rồi sắp xếp nó lại thành ảnh hoàn chỉnh
 public class ProcessThread extends Thread {
 	public static TeacherController par;
 	private boolean isFirst;
@@ -26,21 +26,17 @@ public class ProcessThread extends Thread {
 				}
 				continue;
 			}
-			//byte[]: <studentid> <total: số mảnh> <imagenum(số thứ tự khung hình)-isScreen(loại luồng): chứa thông tin kép> <Số thứ tự mảnh>
-			//Mã hóa: (imageNum*Max_cams) + isScreen
-			//MAX_CAMS: số ô tối đa
 			byte[] receiveData = packet.getData();
 			int isScreen = receiveData[2] % Constant.MAX_CAMS;
 			int studentNum = isScreen == 1 ? receiveData[0] * 2 : receiveData[0] * 2 + 1;
 			int total = receiveData[1];
-			int imageNum = receiveData[2] / Constant.MAX_CAMS; //Lấy ra số thứ tự khung hình
+			int imageNum = receiveData[2] / Constant.MAX_CAMS;
 			int packetNum = receiveData[3];
-			ArrayList<ImageModel> studentImages = par.images.get(studentNum); //Lấy dữ liệu ảnh theo id
+			ArrayList<ImageModel> studentImages = par.images.get(studentNum);
 			if (studentImages == null) {
 				studentImages = new ArrayList<>();
 				int max_size = isScreen == 1 ? Constant.MAX_SCREENS
 						: Constant.MAX_CAMS;
-				//Thêm các dữ liệu rỗng vào
 				while (studentImages.size() < max_size)
 					studentImages.add(null);
 				ImageModel image = new ImageModel(total, System.currentTimeMillis());

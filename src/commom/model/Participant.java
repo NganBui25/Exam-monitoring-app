@@ -1,4 +1,4 @@
-package Server.Entity;
+package commom.model;
 
 public class Participant {
 	int id; 

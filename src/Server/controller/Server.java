@@ -1,21 +1,15 @@
 package Server.controller;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.mysql.jdbc.Connection;
-
-import Server.controller.Server;
-import Server.Utils.DBHelper;
-import Server.dto.Room;
+import commom.dto.Room;
 
 public class Server {
 	public static Map<Integer, Room> rooms = new ConcurrentHashMap<>();
@@ -32,7 +26,7 @@ public class Server {
 
 //TCP Server class
 class TCPServer implements Runnable {
-	
+
 	@Override
 	public void run() {
 		try (ServerSocket tcpServer = new ServerSocket(8888)) {
@@ -45,6 +39,7 @@ class TCPServer implements Runnable {
 		}
 	}
 }
+
 //UDP Server class
 class UDPServer implements Runnable {
 	@Override
@@ -65,4 +60,5 @@ class UDPServer implements Runnable {
 			e.printStackTrace();
 		}
 	}
+
 }

@@ -44,7 +44,7 @@ public class KeyLog extends JFrame {
 	ArrayList<Double> times = new ArrayList<>();
 	ArrayList<Character> keys = new ArrayList<>();
 	public String raw = "";
-	public static boolean isPlaying;
+	public boolean isPlaying;
 	public JButton start;
 	public Thread simulation;
 	public double speed = 1;
@@ -130,3 +130,9 @@ public class KeyLog extends JFrame {
 		}
 	}
 }
+//|| c == '⌘' || c == '⌥' || c == '⇥' || c == '⌃' || c == '⇪' || c == '⏎' || e.getKeyCode() == 0xe36
+//Command, option, tab, control, 
+
+//Khi nhan can them vao: tat ca phim
+//Khi tha can them vao: shift, control, command, option
+//←→↑↓

@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 
 import Client.Constant;
-import Client.commom.DTO.InContest.Teacher.Packet;
+import commom.model.Packet;
 
 public class ReceiveThread extends Thread {
 	private TeacherController par;

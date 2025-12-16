@@ -1,4 +1,4 @@
-package Server.DAO;
+package commom.dao;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;

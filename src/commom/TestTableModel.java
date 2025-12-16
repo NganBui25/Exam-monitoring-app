@@ -1,14 +1,15 @@
-package Client.commom.DTO.OutContest;
-
+package commom;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-public class ParticipantTableModel extends AbstractTableModel {
-	private List<Participant> data;
-	private final String[] columnNames = { "ID", "Name"};
+import commom.model.Test;
 
-	public ParticipantTableModel(List<Participant> data) {
+public class TestTableModel extends AbstractTableModel {
+	private List<Test> data;
+	private final String[] columnNames = { "ID", "Name", "Created At" };
+
+	public TestTableModel(List<Test> data) {
 		this.data = data;
 	}
 
@@ -24,12 +25,14 @@ public class ParticipantTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		Participant test = data.get(rowIndex);
+		Test test = data.get(rowIndex);
         switch (columnIndex) {
             case 0: // Cột ID
                 return test.getId();
             case 1: // Cột Name
                 return test.getName();
+            case 2: // Cột Created At
+                return test.getCreate();
             default:
                 return null; // Không có cột nào khác
         }
@@ -40,7 +43,7 @@ public class ParticipantTableModel extends AbstractTableModel {
 		return columnNames[column];
 	}
 
-	public Participant getParticipantAt(int rowIndex) {
+	public Test getTestAt(int rowIndex) {
 		return data.get(rowIndex);
 	}
 }

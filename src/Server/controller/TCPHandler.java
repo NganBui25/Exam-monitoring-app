@@ -17,14 +17,14 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import Server.Constant;
-import Server.DAO.ParticipantDAO;
-import Server.DAO.TestDAO;
-import Server.DAO.UserDAO;
-import Server.dto.ClientModel;
-import Server.dto.Room;
-import Server.Entity.Participant;
-import Server.Entity.Test;
-import Server.Entity.User;
+import commom.dao.ParticipantDAO;
+import commom.dao.TestDAO;
+import commom.dao.UserDAO;
+import commom.dto.ClientModel;
+import commom.dto.Room;
+import commom.model.Participant;
+import commom.model.Test;
+import commom.model.User;
 import Server.Utils.Service;
 
 //xử lý tất cả các yêu cầu được gửi từ 1 client duy nhất thông qua giao thức TCP
@@ -111,15 +111,9 @@ public class TCPHandler implements Runnable {
 			case 'X': // Lệnh Kick (Trục xuất)
                 handleKick(message);
                 break;
-
-//			case 'V': // luu video
-//				saveVideo(message, input);
-//				break;
-//				
-//			case 'G':
-//				handleGetVideoRequest(message.substring(1), output);
-//                break;
-				
+			case 'V':
+				saveVideo(message, input);
+				break;
 			default:
 				break;
 			}
@@ -145,7 +139,6 @@ public class TCPHandler implements Runnable {
 			if (room != null) {
                 ClientModel student = room.getStudentByNum(studentNum);
 				if (student != null) {
-					System.out.println(">>> [SERVER-DEBUG] Đã thêm 'KICK' vào hàng đợi của Student: " + studentNum);
                     student.addWarning("KICK");
                 }
                 
@@ -376,5 +369,35 @@ public class TCPHandler implements Runnable {
 	private void endStream(String message) {
 		Server.rooms.remove(Integer.valueOf(message.substring(1)));
 	}
+	private void saveVideo(String message, DataInputStream input) {
+		int length = 0, width = 0, height = 0;
+		try {
+			width = input.readInt();
+			height = input.readInt();
+			length = input.readInt();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 
+		String splitMsg[] = message.split(",");
+		int typeVideo = Integer.parseInt(splitMsg[1]);
+		String participant_id = splitMsg[2];
+		Queue<byte[]> imageBytes = new ConcurrentLinkedQueue<byte[]>();
+		new SaveVideoThread(imageBytes, length, typeVideo, participant_id, width, height).start();;
+		for (int i = 0; i < length; i++) {
+			try {
+				int bytesLength = input.readInt();
+				if (bytesLength > 0) {
+					byte[] receiveImageBytes = new byte[bytesLength];
+
+					input.readFully(receiveImageBytes);
+
+					imageBytes.add(receiveImageBytes);
+				}
+			} catch (IOException ex) {
+				ex.printStackTrace();
+				break;
+			}
+		}
+	}
 }

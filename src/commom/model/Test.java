@@ -1,4 +1,4 @@
-package Server.Entity;
+package commom.model;
 
 import java.util.Date;
 

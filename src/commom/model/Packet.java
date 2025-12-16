@@ -1,11 +1,10 @@
-package Client.commom.DTO.InContest.Teacher;
+package commom.model;
 
 public class Packet {
-	private int length;
-	private byte[] data;
+	private int length; //Độ dài của mảng byte
+	private byte[] data; // 1 dãy byte nhị phân của 1 phần bức ảnh, dữ liệu thô
 
 	public Packet(int length, byte[] data) {
-		super();
 		this.length = length;
 		this.data = data;
 	}

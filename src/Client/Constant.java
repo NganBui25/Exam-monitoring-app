@@ -23,8 +23,8 @@ public class Constant {
 	//Student
 	public static final int NORMAL_WIDTH = 450;
 	public static final int NORMAL_HEIGHT = 300;
-	public static final int FOCUS_WIDTH = 800;
-	public static final int FOCUS_HEIGHT = 500;
+	public static final int FOCUS_WIDTH = 900;
+	public static final int FOCUS_HEIGHT = 600;
 	public static final long KEYBOARD_DURATION = 10000; // 5 phut: 300000
 	public static final int IMAGE_SEGMENT = 1100;
 	public static final int MAX_SCREENS = 4;

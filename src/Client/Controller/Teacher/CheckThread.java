@@ -1,9 +1,10 @@
 package Client.Controller.Teacher;
+
 import java.util.ArrayList;
 import java.util.Map;
 
 import Client.Constant;
-import Client.commom.DTO.InContest.Teacher.ImageModel;
+import commom.dto.ImageModel;
 
 public class CheckThread extends Thread {
 	private TeacherController par;
@@ -27,7 +28,6 @@ public class CheckThread extends Thread {
 					ImageModel img = studentImages.get(i);
 					if (img == null)
 						continue;
-					// ảnh đã hoàn chỉnh
 					if (img.getTotal() == img.getData().size()) {
 						while (studentNum >= par.viewList.size())
 							par.viewList.add(null);

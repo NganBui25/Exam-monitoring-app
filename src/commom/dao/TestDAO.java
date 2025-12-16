@@ -1,8 +1,8 @@
-package Server.DAO;
+package commom.dao;
 import java.time.LocalDate;
 import java.util.List;
 
-import Server.Entity.Test;
+import commom.model.Test;
 
 public class TestDAO {
     private static final GenericDAO<Test> genericDAO = new GenericDAO<>(rs -> 

@@ -3,8 +3,8 @@ package Server.controller;
 import java.util.Map;
 
 import Server.Constant;
-import Server.dto.ClientModel;
-import Server.dto.Room;
+import commom.dto.ClientModel;
+import commom.dto.Room;
 
 public class CleanThread implements Runnable {
 	public void run() {

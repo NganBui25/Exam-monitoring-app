@@ -1,4 +1,5 @@
 package Client.View.KeyLog;
+
 import java.util.ArrayList;
 
 public class SimulationThread extends Thread {

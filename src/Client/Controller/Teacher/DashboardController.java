@@ -2,20 +2,16 @@ package Client.Controller.Teacher;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-
 import Client.Constant;
-import Client.commom.DTO.OutContest.Participant;
-import Client.commom.DTO.OutContest.Test;
-import Client.commom.DTO.OutContest.User;
+import commom.model.Participant;
+import commom.model.Test;
+import commom.model.User;
 import Client.commom.Util.Service;
 import Client.View.Home;
 import Client.View.TeacherDashboard;
@@ -129,6 +125,21 @@ public class DashboardController {
 			dos.writeUTF(msg);
 			String receiveMsg = dis.readUTF();
 			new KeyLog(receiveMsg);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	public void showVideo(Integer participant_id) {
+		if(participant_id == null) {
+			return;
+		}
+		String msg = "V" + participant_id;
+		try (Socket soc = new Socket(Constant.serverAddress, Constant.tcpPort);
+				DataInputStream dis = new DataInputStream(soc.getInputStream());
+				DataOutputStream dos = new DataOutputStream(soc.getOutputStream())) {
+			dos.writeUTF(msg);
+			String receiveMsg = dis.readUTF();
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

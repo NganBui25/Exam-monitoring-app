@@ -1,4 +1,4 @@
-package Server.dto;
+package commom.dto;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
