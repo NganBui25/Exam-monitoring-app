@@ -38,10 +38,33 @@ public class TeacherInContest extends JFrame {
 		this.controller = controller;
 		setLayout(new BorderLayout());
 
-		JPanel topPn = new JPanel(new FlowLayout());
-		topPn.add(new JLabel("Contest Name:" + controller.name));
-		topPn.add(new JLabel("Room ID:" + controller.roomId));
-
+		// --- SỬA PHẦN TOP PANEL ---
+	    JPanel topPn = new JPanel(new FlowLayout(FlowLayout.LEFT)); // FlowLayout trái
+	    topPn.add(new JLabel("Contest Name: " + controller.name + " | Room ID: " + controller.roomId));
+	    
+	    // NÚT UPLOAD ĐỀ THI
+	    JButton btnUpload = new JButton("Upload Đề thi");
+	    btnUpload.setFocusable(false);
+	    btnUpload.addActionListener(new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	            // Mở hộp thoại chọn file
+	            javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+	            // Lọc chỉ cho chọn file doc, docx, pdf (Tùy chọn)
+	            // fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Document", "docx", "pdf", "txt"));
+	            
+	            int result = fileChooser.showOpenDialog(TeacherInContest.this);
+	            if (result == javax.swing.JFileChooser.APPROVE_OPTION) {
+	                java.io.File selectedFile = fileChooser.getSelectedFile();
+	                // Gọi Controller xử lý
+	                controller.uploadExamFile(selectedFile);
+	            }
+	        }
+	    });
+	    
+	    // Thêm nút vào Top Panel (Bên cạnh thông tin phòng)
+	    topPn.add(javax.swing.Box.createHorizontalStrut(20)); // Tạo khoảng cách
+	    topPn.add(btnUpload);
 		JScrollPane mainPn = new JScrollPane();
 		cameras = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
 		cameras.setPreferredSize(new Dimension(500, 10000));

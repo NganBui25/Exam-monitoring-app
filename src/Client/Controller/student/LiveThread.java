@@ -70,10 +70,9 @@ public class LiveThread extends Thread {
 						break;
 					}
 					else if (msg.startsWith("ALERT:")) {
-                        String warningContent = msg.substring(6); // Lấy nội dung sau chữ ALERT:
+                        String warningContent = msg.substring(6); 
                         
                         if (warningContent.equals("KICK")) {
-                            // 1. Thông báo cho sinh viên biết lý do
                             JOptionPane.showMessageDialog(par.view, 
                                 "Bạn đã bị giáo viên trục xuất khỏi phòng thi!", 
                                 "Thông báo", 
@@ -81,7 +80,6 @@ public class LiveThread extends Thread {
                             
                             par.running = false;
                         } else {
-                            // Nếu là cảnh báo thường (ví dụ: mất trật tự) thì chỉ hiện thông báo
                             par.view.showWarning(warningContent);
                         }
                     }

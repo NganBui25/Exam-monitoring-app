@@ -361,51 +361,67 @@ public class TeacherDashboard extends javax.swing.JFrame {
 
 		mainPanel.add(ctctForm, "CTCT");
 
-		JPanel detailForm = new JPanel();
-		javax.swing.GroupLayout detailFormLayout = new javax.swing.GroupLayout(detailForm);
-		detailForm.setLayout(detailFormLayout);
+		// --- BẮT ĐẦU SỬA ĐỔI DETAIL FORM ---
+        JPanel detailForm = new JPanel();
+        javax.swing.GroupLayout detailFormLayout = new javax.swing.GroupLayout(detailForm);
+        detailForm.setLayout(detailFormLayout);
 
-		// Tạo nút "Quay lại"
-		JButton backButton1 = new JButton("Quay lại");
-		backButton1.addActionListener(e -> {
-			cardLayout.show(mainPanel, "CTCT"); // Quay lại màn hình "CTCT"
-		});
+        // Tạo nút "Quay lại"
+        JButton backButton1 = new JButton("Quay lại");
+        backButton1.addActionListener(e -> {
+            cardLayout.show(mainPanel, "CTCT"); // Quay lại màn hình "CTCT"
+        });
 
-		// Tạo nút dạng "clip"
-		JButton clipButton = new JButton("Record screen"); // Biểu tượng clip
-		clipButton.addActionListener(e -> {
+        // Tạo nút dạng "clip"
+        JButton clipButton = new JButton("Record screen");
+        clipButton.addActionListener(e -> {
+            // Tích hợp logic xem video tại đây (như đã bàn ở các bước trước)
+            if (participant_id != null) {
+                 // Gọi hàm mở panel video player
+                 // teacherController.showVideo(participant_id); 
+            }
+        });
 
-		});
+        // Tạo nút dạng "file txt"
+        JButton fileButton = new JButton("Keyboard log");
+        fileButton.addActionListener(e -> {
+            teacherController.showKeys(participant_id);
+        });
+        
+        // Tạo nút "Tải bài làm"
+        JButton btnBaiLam = new JButton("Xem bài làm");
+        btnBaiLam.addActionListener(e -> {
+            if (participant_id != null) {
+                teacherController.downloadStudentSubmission(participant_id);
+            } else {
+                JOptionPane.showMessageDialog(this, "Chưa chọn thí sinh!");
+            }
+        });
 
-		// Tạo nút dạng "file txt"
-		JButton fileButton = new JButton("Keyboard log"); // Biểu tượng file txt
-		fileButton.addActionListener(e -> {
-			teacherController.showKeys(participant_id);
-		});
+        detailFormLayout.setHorizontalGroup(detailFormLayout.createSequentialGroup().addContainerGap()
+                .addGroup(detailFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(backButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(detailFormLayout.createSequentialGroup()
+                                .addComponent(clipButton, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE) // Tăng size chút cho đẹp
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(fileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED) // Khoảng cách
+                                .addComponent(btnBaiLam, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))) // <--- THÊM VÀO ĐÂY
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
 
-		// Thiết lập bố cục ngang
-		detailFormLayout.setHorizontalGroup(detailFormLayout.createSequentialGroup().addContainerGap()
-				.addGroup(detailFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-						.addGroup(detailFormLayout.createSequentialGroup().addComponent(backButton1,
-								javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-						.addGroup(detailFormLayout.createSequentialGroup()
-								.addComponent(clipButton, javax.swing.GroupLayout.PREFERRED_SIZE, 100,
-										javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addComponent(fileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 50,
-										javax.swing.GroupLayout.PREFERRED_SIZE)))
-				.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
+        // 2. Nhóm Dọc (Vertical)
+        detailFormLayout.setVerticalGroup(detailFormLayout.createSequentialGroup().addContainerGap()
+                .addComponent(backButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(detailFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(clipButton)
+                        .addComponent(fileButton)
+                        .addComponent(btnBaiLam)) // <--- THÊM VÀO ĐÂY (Cùng hàng với 2 nút kia)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
 
-		// Thiết lập bố cục dọc
-		detailFormLayout.setVerticalGroup(detailFormLayout.createSequentialGroup().addContainerGap()
-				.addComponent(backButton1).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-				.addGroup(detailFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-						.addComponent(clipButton).addComponent(fileButton))
-				.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
-
-		// Thêm form này vào mainPanel
-		mainPanel.add(detailForm, "DetailForm");
-
+        // Thêm form này vào mainPanel
+        mainPanel.add(detailForm, "DetailForm");
+        // --- KẾT THÚC SỬA ĐỔI ---
 		getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
 
 		this.setVisible(true);

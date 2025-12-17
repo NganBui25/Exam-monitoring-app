@@ -32,7 +32,38 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
 		cameraScreen.setText("Đang tải camera...");
         cameraScreen.setHorizontalAlignment(JLabel.CENTER);
 
-		JPanel topPn = new JPanel(new BorderLayout());
+        JPanel topPn = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        
+        // Nút tải đề
+        JButton btnDownload = new JButton("Tải đề thi");
+        btnDownload.setFocusable(false);
+        btnDownload.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.downloadExamFile();
+            }
+        });
+        
+        JButton btnSubmit = new JButton("Nộp bài");
+        btnSubmit.addActionListener(e -> {
+            javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+            if (fileChooser.showOpenDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                java.io.File file = fileChooser.getSelectedFile();
+                int confirm = javax.swing.JOptionPane.showConfirmDialog(this, 
+                    "Bạn có chắc muốn nộp file: " + file.getName() + "?", "Xác nhận", javax.swing.JOptionPane.YES_NO_OPTION);
+                if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+                    controller.submitExam(file);
+                }
+            }
+        });
+        btnDownload.setVisible(false);
+        btnSubmit.setVisible(false);
+        // Thêm btnSubmit vào thanh công cụ (topPn)
+        topPn.add(btnSubmit);
+        
+
+        topPn.add(javax.swing.Box.createHorizontalStrut(20)); // Khoảng cách
+        topPn.add(btnDownload);
 		JButton backBtn = new JButton("\u2190");
 		topPn.add(backBtn, BorderLayout.WEST);
 		backBtn.addActionListener(e -> controller.back());
@@ -62,6 +93,8 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
 				button.setEnabled(false);
 				String msg = controller.joinRoom(nameTf.getText(), roomIdTf.getText());
 				if (msg != null) {
+					btnDownload.setVisible(true);
+			        btnSubmit.setVisible(true);
 					teacher.setText("Contest name: " + msg);
 					lbName.setVisible(false);
 					lbRoomId.setVisible(false);

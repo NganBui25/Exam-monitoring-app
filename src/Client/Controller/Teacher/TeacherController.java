@@ -1,6 +1,7 @@
 package Client.Controller.Teacher;
 
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.Socket;
@@ -102,6 +103,37 @@ public class TeacherController extends InContestBaseController{
 	    } catch (IOException e) {
 	        e.printStackTrace();
 	    }
+	}
+	
+	public void uploadExamFile(File file) {
+	    // Chạy trong Thread mới để không làm đơ giao diện khi đang upload file nặng
+	    new Thread(() -> {
+	        try (java.net.Socket uploadSocket = new java.net.Socket(Client.Constant.serverAddress, Client.Constant.tcpPort);
+	             java.io.DataOutputStream dos = new java.io.DataOutputStream(uploadSocket.getOutputStream())) {
+
+	            // 1. Gửi lệnh U + RoomID (roomId lấy từ biến của controller)
+	            dos.writeUTF("A" + roomId);
+
+	            // 2. Gửi thông tin file
+	            dos.writeUTF(file.getName());
+	            dos.writeLong(file.length());
+
+	            // 3. Gửi nội dung file
+	            try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
+	                byte[] buffer = new byte[4096];
+	                int read;
+	                while ((read = fis.read(buffer)) != -1) {
+	                    dos.write(buffer, 0, read);
+	                }
+	            }
+	            dos.flush();
+	            javax.swing.JOptionPane.showMessageDialog(view, "Upload đề thi thành công!", "Thông báo", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            javax.swing.JOptionPane.showMessageDialog(view, "Lỗi upload: " + e.getMessage(), "Lỗi", javax.swing.JOptionPane.ERROR_MESSAGE);
+	        }
+	    }).start();
 	}
 	
 }

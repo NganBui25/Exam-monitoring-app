@@ -114,6 +114,18 @@ public class TCPHandler implements Runnable {
 			case 'V':
 				saveVideo(message, input);
 				break;
+			case 'A':
+				receiveExamFile(message.substring(1), input);
+				break;
+			case 'G':
+				sendExamFile(message.substring(1), output);
+			    break;
+			case 'N':
+				receiveSubmission(message.substring(1), input);
+			    break;
+			case 'I':
+				sendStudentSubmission(message.substring(1), output);
+			    break;
 			default:
 				break;
 			}
@@ -127,6 +139,130 @@ public class TCPHandler implements Runnable {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	// Hàm 1: Nhận bài làm từ sinh viên
+	private void receiveSubmission(String participantId, DataInputStream input) {
+	    try {
+	        String fileName = input.readUTF();
+	        long fileSize = input.readLong();
+	        
+	        // Tạo thư mục riêng cho từng sinh viên: Data/Submissions/[ID]/
+	        String folderPath = Constant.FILE_LOCATION + File.separator + "Submissions" + File.separator + participantId + File.separator;
+	        File folder = new File(folderPath);
+	        if (!folder.exists()) folder.mkdirs();
+	        
+	        // Xóa bài cũ nếu nộp lại (để chỉ giữ 1 bài mới nhất)
+	        File[] oldFiles = folder.listFiles();
+	        if(oldFiles != null) for(File f : oldFiles) f.delete();
+
+	        // Lưu file
+	        File file = new File(folderPath + fileName);
+	        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+	            byte[] buffer = new byte[4096];
+	            long totalRead = 0;
+	            int read;
+	            while (totalRead < fileSize && (read = input.read(buffer, 0, (int)Math.min(buffer.length, fileSize - totalRead))) != -1) {
+	                fos.write(buffer, 0, read);
+	                totalRead += read;
+	            }
+	        }
+	        System.out.println("Sinh viên " + participantId + " đã nộp bài: " + fileName);
+	        
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+
+	// Hàm 2: Gửi bài làm cho giáo viên
+	private void sendStudentSubmission(String participantId, DataOutputStream output) {
+	    try {
+	        String folderPath = Constant.FILE_LOCATION + File.separator + "Submissions" + File.separator + participantId + File.separator;
+	        File folder = new File(folderPath);
+	        File[] files = folder.listFiles();
+	        
+	        if (files != null && files.length > 0) {
+	            File file = files[0]; // Lấy file bài làm
+	            
+	            output.writeUTF("OK");
+	            output.writeUTF(file.getName());
+	            output.writeLong(file.length());
+	            
+	            try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
+	                byte[] buffer = new byte[4096];
+	                int read;
+	                while ((read = fis.read(buffer)) != -1) {
+	                    output.write(buffer, 0, read);
+	                }
+	            }
+	            output.flush();
+	        } else {
+	            output.writeUTF("NO_FILE"); // Sinh viên này chưa nộp bài
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	
+
+	private void receiveExamFile(String substring, DataInputStream input) {
+		try {
+			String fileName = input.readUTF();
+			long fileSize = input.readLong();
+			String folderPath = Constant.FILE_LOCATION + File.separator + "Test" + File.separator + substring + File.separator;
+	        File folder = new File(folderPath);
+	        if (!folder.exists()) folder.mkdirs();
+	        
+	        // 3. Tạo file trên ổ cứng Server
+	        File file = new File(folderPath + fileName);
+	        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+	            byte[] buffer = new byte[4096];
+	            long totalRead = 0;
+	            int read;
+	            // Vòng lặp đọc byte từ mạng và ghi xuống file
+	            while (totalRead < fileSize && (read = input.read(buffer, 0, (int)Math.min(buffer.length, fileSize - totalRead))) != -1) {
+	                fos.write(buffer, 0, read);
+	                totalRead += read;
+	            }
+	        }
+	        System.out.println("Đã nhận đề thi");
+		}catch (IOException e) {
+	        e.printStackTrace();
+	    }
+		
+	}
+	
+	// Hàm 2: Gửi file từ Server xuống cho Student
+	private void sendExamFile(String testId, DataOutputStream output) {
+	    try {
+	        // Tìm file trong thư mục phòng thi
+	        String folderPath = Constant.FILE_LOCATION + File.separator + "Test" + File.separator + testId + File.separator;
+	        File folder = new File(folderPath);
+	        
+	        File[] files = folder.listFiles(); // Lấy file đầu tiên tìm thấy
+	        if (files != null && files.length > 0) {
+	            File file = files[0]; // Giả sử chỉ có 1 đề thi
+	            
+	            output.writeUTF("OK"); // Báo là có file
+	            output.writeUTF(file.getName()); // Gửi tên file
+	            output.writeLong(file.length()); // Gửi kích thước
+	            
+	            // Đọc file từ ổ cứng và bắn qua mạng
+	            try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
+	                byte[] buffer = new byte[4096];
+	                int read;
+	                while ((read = fis.read(buffer)) != -1) {
+	                    output.write(buffer, 0, read);
+	                }
+	            }
+	            output.flush();
+	        } else {
+	            output.writeUTF("NO_FILE"); // Báo không có đề
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
 	}
 
 	private void handleKick(String msg) {
