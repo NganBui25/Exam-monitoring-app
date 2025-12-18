@@ -29,7 +29,6 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
 		setLayout(new BorderLayout());
 
 		cameraScreen = new JLabel();
-		cameraScreen.setText("Đang tải camera...");
         cameraScreen.setHorizontalAlignment(JLabel.CENTER);
 
         JPanel topPn = new JPanel(new FlowLayout(FlowLayout.LEFT));

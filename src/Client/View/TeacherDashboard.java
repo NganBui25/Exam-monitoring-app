@@ -372,16 +372,6 @@ public class TeacherDashboard extends javax.swing.JFrame {
             cardLayout.show(mainPanel, "CTCT"); // Quay lại màn hình "CTCT"
         });
 
-        // Tạo nút dạng "clip"
-        JButton clipButton = new JButton("Record screen");
-        clipButton.addActionListener(e -> {
-            // Tích hợp logic xem video tại đây (như đã bàn ở các bước trước)
-            if (participant_id != null) {
-                 // Gọi hàm mở panel video player
-                 // teacherController.showVideo(participant_id); 
-            }
-        });
-
         // Tạo nút dạng "file txt"
         JButton fileButton = new JButton("Keyboard log");
         fileButton.addActionListener(e -> {
@@ -402,8 +392,6 @@ public class TeacherDashboard extends javax.swing.JFrame {
                 .addGroup(detailFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(backButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(detailFormLayout.createSequentialGroup()
-                                .addComponent(clipButton, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE) // Tăng size chút cho đẹp
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(fileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED) // Khoảng cách
                                 .addComponent(btnBaiLam, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))) // <--- THÊM VÀO ĐÂY
@@ -414,7 +402,6 @@ public class TeacherDashboard extends javax.swing.JFrame {
                 .addComponent(backButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(detailFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(clipButton)
                         .addComponent(fileButton)
                         .addComponent(btnBaiLam)) // <--- THÊM VÀO ĐÂY (Cùng hàng với 2 nút kia)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));

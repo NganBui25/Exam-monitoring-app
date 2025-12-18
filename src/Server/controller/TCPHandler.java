@@ -111,9 +111,6 @@ public class TCPHandler implements Runnable {
 			case 'X': // Lệnh Kick (Trục xuất)
                 handleKick(message);
                 break;
-			case 'V':
-				saveVideo(message, input);
-				break;
 			case 'A':
 				receiveExamFile(message.substring(1), input);
 				break;
@@ -361,7 +358,8 @@ public class TCPHandler implements Runnable {
 			int msgNum = Integer.parseInt(message.substring(j + 1));
 			ClientModel student = room.getStudents().get(studentId);
 		    student.setTime(System.currentTimeMillis());
-
+		    //Cập nhật thời gian student liên lạc
+		    
 			if (studentId * 2 == room.getFocusAddress()) {
 				dos.writeUTF("H1");
 			} else if (studentId * 2 + 1 == room.getFocusAddress()) {
@@ -504,36 +502,5 @@ public class TCPHandler implements Runnable {
 
 	private void endStream(String message) {
 		Server.rooms.remove(Integer.valueOf(message.substring(1)));
-	}
-	private void saveVideo(String message, DataInputStream input) {
-		int length = 0, width = 0, height = 0;
-		try {
-			width = input.readInt();
-			height = input.readInt();
-			length = input.readInt();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		String splitMsg[] = message.split(",");
-		int typeVideo = Integer.parseInt(splitMsg[1]);
-		String participant_id = splitMsg[2];
-		Queue<byte[]> imageBytes = new ConcurrentLinkedQueue<byte[]>();
-		new SaveVideoThread(imageBytes, length, typeVideo, participant_id, width, height).start();;
-		for (int i = 0; i < length; i++) {
-			try {
-				int bytesLength = input.readInt();
-				if (bytesLength > 0) {
-					byte[] receiveImageBytes = new byte[bytesLength];
-
-					input.readFully(receiveImageBytes);
-
-					imageBytes.add(receiveImageBytes);
-				}
-			} catch (IOException ex) {
-				ex.printStackTrace();
-				break;
-			}
-		}
 	}
 }

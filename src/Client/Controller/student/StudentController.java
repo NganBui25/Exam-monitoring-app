@@ -80,8 +80,6 @@ public class StudentController extends InContestBaseController {
 		new CaptureThread(this, false).start();
 		new SendThread(this, true).start();
 		new SendThread(this, false).start();
-		new SaveVideoThread(this, true).start();
-		new SaveVideoThread(this, false).start();
 		new LiveThread(this).start();
 		
 		new CameraStudentThread().start();
@@ -140,7 +138,7 @@ public class StudentController extends InContestBaseController {
 	                                
 	                                // Cách đơn giản nhất: Set thẳng ảnh gốc vào
 	                                view.cameraScreen.setIcon(new ImageIcon(image));
-	                                view.cameraScreen.setText(""); // Xóa text "Đang tải..." nếu có
+	                                view.cameraScreen.setText(""); 
 	                            }
 	                        });
 	                    }
