@@ -4,13 +4,17 @@
  */
 package Client.View;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Frame;
 import java.awt.Image;
 import java.net.URL;
 import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -202,17 +206,14 @@ public class TeacherDashboard extends javax.swing.JFrame {
 				.setHorizontalGroup(
 						trangchuFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 								.addGroup(trangchuFormLayout.createSequentialGroup().addGap(234, 234, 234)
-										.addComponent(tencuocthi, javax.swing.GroupLayout.PREFERRED_SIZE, 350, // Tăng
-																												// chiều
-																												// rộng
+										.addComponent(tencuocthi, javax.swing.GroupLayout.PREFERRED_SIZE, 350, 
 												javax.swing.GroupLayout.PREFERRED_SIZE)
 										.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-										.addComponent(trangchu_batdau, javax.swing.GroupLayout.PREFERRED_SIZE, 100, // Tăng
-																													// chiều
-																													// rộng
+										.addComponent(trangchu_batdau, javax.swing.GroupLayout.PREFERRED_SIZE, 100, 
+
 												javax.swing.GroupLayout.PREFERRED_SIZE)
-										.addContainerGap(180, Short.MAX_VALUE))); // Giảm containerGap để bù kích thước
-																					// tăng
+										.addContainerGap(180, Short.MAX_VALUE))); 
+		
 		trangchuFormLayout.setVerticalGroup(trangchuFormLayout
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 				.addGroup(trangchuFormLayout.createSequentialGroup().addGap(246, 246, 246)
@@ -378,11 +379,10 @@ public class TeacherDashboard extends javax.swing.JFrame {
             teacherController.showKeys(participant_id);
         });
         
-        // Tạo nút "Tải bài làm"
         JButton btnBaiLam = new JButton("Xem bài làm");
         btnBaiLam.addActionListener(e -> {
             if (participant_id != null) {
-                teacherController.downloadStudentSubmission(participant_id);
+                teacherController.previewStudentSubmission(participant_id);
             } else {
                 JOptionPane.showMessageDialog(this, "Chưa chọn thí sinh!");
             }
@@ -467,7 +467,127 @@ public class TeacherDashboard extends javax.swing.JFrame {
 	private void trangchu_batdauActionPerformed(java.awt.event.ActionEvent evt) {
 		teacherController.batdau(tencuocthi.getText());
 	}
+	
+	class SubmissionViewer extends JDialog{
+		private byte[] fileData;
+		private String fileName;
+		
+		public SubmissionViewer(Frame parent, String fileName, byte[] data) {
+			super(parent, "Xem bài làm: " + fileName, true);
+			this.fileName = fileName;
+			this.fileData = data;
+			setSize(800,600);
+			setLocationRelativeTo(parent);
+			setLayout(new BorderLayout());
+			
+			javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane();
+			try {
+                if (isTextFile(fileName)) {
+                    // 1. TEXT/CODE
+                    javax.swing.JTextArea textArea = new javax.swing.JTextArea(new String(data));
+                    textArea.setEditable(false);
+                    textArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 14));
+                    scrollPane.setViewportView(textArea);
+                    
+                } else if (isImageFile(fileName)) {
+                    // 2. ẢNH
+                    showImage(data, scrollPane);
+                    
+                }  else {
+                	javax.swing.JPanel panel = new javax.swing.JPanel(new java.awt.GridBagLayout());
+                    java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
+                    gbc.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+                    gbc.insets = new java.awt.Insets(10, 10, 10, 10);
 
+                    javax.swing.JLabel lblIcon = new javax.swing.JLabel(javax.swing.UIManager.getIcon("FileView.fileIcon")); // Icon file mặc định
+                    javax.swing.JLabel lblInfo = new javax.swing.JLabel("<html><center>File <b>" + fileName + "</b><br>cần ứng dụng bên ngoài để xem trước.</center></html>", javax.swing.SwingConstants.CENTER);
+                    lblInfo.setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 16));
+                    
+                    javax.swing.JButton btnOpenSystem = new javax.swing.JButton("Mở xem ngay (Word/PDF/...)");
+                    btnOpenSystem.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
+                    btnOpenSystem.setBackground(new java.awt.Color(52, 152, 219));
+                    btnOpenSystem.setForeground(java.awt.Color.WHITE);
+                    
+                    // Sự kiện click nút "Mở xem ngay"
+                    btnOpenSystem.addActionListener(e -> {
+                        try {
+                            // a. Tạo file tạm trong thư mục Temp của Windows
+                            String extension = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf(".")) : ".tmp";
+                            java.io.File tempFile = java.io.File.createTempFile("exam_preview_", extension);
+                            tempFile.deleteOnExit(); // Tự xóa khi tắt chương trình Java
+
+                            // b. Ghi dữ liệu vào file tạm
+                            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(tempFile)) {
+                                fos.write(fileData);
+                            }
+
+                            // c. Gọi Windows mở file bằng phần mềm mặc định
+                            if (java.awt.Desktop.isDesktopSupported()) {
+                                java.awt.Desktop.getDesktop().open(tempFile);
+                            } else {
+                                javax.swing.JOptionPane.showMessageDialog(this, "Máy không hỗ trợ tính năng này!");
+                            }
+
+                        } catch (Exception ex) {
+                            javax.swing.JOptionPane.showMessageDialog(this, "Lỗi khi mở file: " + ex.getMessage());
+                        }
+                    });
+
+                    panel.add(lblIcon, gbc);
+                    panel.add(lblInfo, gbc);
+                    panel.add(btnOpenSystem, gbc);
+                    scrollPane.setViewportView(panel);
+                }
+            } catch (Exception e) {
+                 scrollPane.setViewportView(new javax.swing.JLabel("Lỗi: " + e.getMessage()));
+            }
+
+            add(scrollPane, java.awt.BorderLayout.CENTER);
+
+            // Nút bấm dưới cùng
+            javax.swing.JPanel bottomPanel = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+            javax.swing.JButton btnSave = new javax.swing.JButton("Tải về máy");
+            btnSave.addActionListener(e -> saveFileToDisk());
+            bottomPanel.add(btnSave);
+            add(bottomPanel, java.awt.BorderLayout.SOUTH);
+        }
+
+        // Hàm phụ hiển thị ảnh
+        private void showImage(byte[] data, javax.swing.JScrollPane scroll) {
+            javax.swing.JLabel imgLabel = new javax.swing.JLabel();
+            imgLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            javax.swing.ImageIcon icon = new javax.swing.ImageIcon(data);
+            if (icon.getIconWidth() > 900) {
+                 java.awt.Image img = icon.getImage().getScaledInstance(850, -1, java.awt.Image.SCALE_SMOOTH);
+                 icon = new javax.swing.ImageIcon(img);
+            }
+            imgLabel.setIcon(icon);
+            scroll.setViewportView(imgLabel);
+        }
+
+        private void saveFileToDisk() {
+            javax.swing.JFileChooser ch = new javax.swing.JFileChooser();
+            ch.setSelectedFile(new java.io.File(fileName));
+            if (ch.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                try (java.io.FileOutputStream fos = new java.io.FileOutputStream(ch.getSelectedFile())) {
+                    fos.write(fileData);
+                    javax.swing.JOptionPane.showMessageDialog(this, "Đã lưu!");
+                } catch (Exception ex) { ex.printStackTrace(); }
+            }
+        }
+        
+        private boolean isTextFile(String n) { 
+            n = n.toLowerCase(); 
+            return n.endsWith(".txt") || n.endsWith(".java") || n.endsWith(".c") || n.endsWith(".cpp") || n.endsWith(".py") || n.endsWith(".html"); 
+        }
+        private boolean isImageFile(String n) { 
+            n = n.toLowerCase(); 
+            return n.endsWith(".png") || n.endsWith(".jpg") || n.endsWith(".jpeg"); 
+        }
+    }
+	public void showSubmissionDialog(String fileName, byte[] data) {
+		new SubmissionViewer(this, fileName, data).setVisible(true);
+	}
 	private commom.TestTableModel lsct_model;
 	private commom.ParticipantTableModel ptcp_model;
 	private java.awt.CardLayout cardLayout;

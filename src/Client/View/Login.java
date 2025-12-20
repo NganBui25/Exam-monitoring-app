@@ -77,21 +77,21 @@ public class Login extends javax.swing.JFrame {
         gbc.insets = new Insets(0, 0, 5, 0);
         mainPanel.add(createLabel("Mật khẩu:"), gbc);
 
-        // --- 6. Ô "Mật khẩu" ---
+        // Ô "Mật khẩu"
         password = new JPasswordField("teacher123"); // Giữ giá trị mặc định của bạn
         styleField(password);
         gbc.gridy++;
         gbc.insets = new Insets(0, 0, 30, 0); // Khoảng cách dưới
         mainPanel.add(password, gbc);
 
-        // --- 7. Nút "Đăng nhập" ---
+        // Nút "Đăng nhập" 
         login = new JButton("Đăng nhập");
         stylePrimaryButton(login);
         gbc.gridy++;
         gbc.insets = new Insets(0, 0, 20, 0);
         mainPanel.add(login, gbc);
 
-        // --- 8. Link "Chuyển sang Đăng ký" ---
+        // Link "Chuyển sang Đăng ký"
         JPanel switchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         switchPanel.setBackground(Color.WHITE);
         
@@ -99,7 +99,7 @@ public class Login extends javax.swing.JFrame {
         switchLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         switchLabel.setForeground(Color.GRAY);
         
-        register = createLinkButton("Đăng ký ngay"); // Dùng lại biến 'register'
+        register = createLinkButton("Đăng ký ngay"); 
         
         switchPanel.add(switchLabel);
         switchPanel.add(register);
@@ -112,7 +112,6 @@ public class Login extends javax.swing.JFrame {
         gbc.weighty = 1.0; // Đây là mấu chốt
         mainPanel.add(Box.createVerticalGlue(), gbc);
 
-        // --- 9. Gán sự kiện (dùng hàm cũ) ---
         login.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 loginActionPerformed(evt);
@@ -127,8 +126,6 @@ public class Login extends javax.swing.JFrame {
 
         pack(); // Tối ưu kích thước
     }
-
-    // --- CÁC HÀM TIỆN ÍCH (HELPER) ĐỂ TÙY CHỈNH UI ---
 
     // Tạo nhãn (Label)
     private JLabel createLabel(String text) {
@@ -183,5 +180,4 @@ public class Login extends javax.swing.JFrame {
         this.dispose();
     }
 
-    // Không cần hàm main() nếu bạn khởi động từ Home.java
 }

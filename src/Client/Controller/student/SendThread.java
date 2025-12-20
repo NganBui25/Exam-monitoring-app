@@ -49,7 +49,6 @@ public class SendThread extends Thread {
 					}
 				}
 				currImg = (currImg + 1) % (isScreen ? Constant.MAX_SCREENS : Constant.MAX_CAMS);
-				System.out.println(System.nanoTime() - start);
 				Thread.sleep(20);
 			} catch (Exception ex) {
 			}

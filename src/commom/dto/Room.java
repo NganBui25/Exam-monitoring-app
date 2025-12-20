@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Room {
@@ -17,12 +18,15 @@ public class Room {
 	private String teachername;
 	private Map<String, Integer> studentNums = new ConcurrentHashMap<>();
 	private Map<Integer, ClientModel> students = new ConcurrentHashMap<>();
-	private Map<Integer, Integer> forFocus = new HashMap<>();
-	private int focusAddress;
+	private Map<Integer, Integer> forFocus = new HashMap<>(); //Sơ đồ camera, tức là key:studentID, value: stt camera
+	private int focusAddress; //giáo viên có đang xem 1 ai khong, -1:gv khong chọn ai/ >0 tức là chọn xem tập trung
 	private ArrayList<String> chatHistory = new ArrayList<>();
 	private Queue<Integer> quittedStudents = new LinkedList<>();
 	private Queue<Map.Entry<Integer, String>> names = new LinkedList<>();
 	private Queue<String> keys = new LinkedList<>();
+	private boolean isLocked = false;
+	private Queue<Integer> raisedHands = new ConcurrentLinkedQueue<>();
+	private Queue<String> warnings = new ConcurrentLinkedQueue<>();
 
 	public Room(InetAddress address, int udpPort, String name) {
 		this.teacher = new ClientModel(0);
@@ -142,5 +146,18 @@ public class Room {
             }
         }
         return null; 
+    }
+	private Queue<Integer> newSubmissions = new ConcurrentLinkedQueue<>();
+
+    public boolean getIsLocked() { return isLocked; }
+    public void setLocked(boolean locked) { isLocked = locked; }
+
+    public Queue<Integer> getNewSubmissions() { return newSubmissions; }
+    
+    public Queue<Integer> getRaisedHands(){
+    	return raisedHands;
+    }
+    public Queue<String> getWarnings() {
+        return warnings;
     }
 }

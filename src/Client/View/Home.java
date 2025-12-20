@@ -18,9 +18,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-/**
- * Giao diện Home được thiết kế lại hoàn toàn
- */
 public class Home extends javax.swing.JFrame {
 
     public Home() {
@@ -29,22 +26,20 @@ public class Home extends javax.swing.JFrame {
 
     private void Components() {
 
-        // --- 1. Cài đặt Cửa sổ (Frame) ---
         setTitle("Hệ thống Giám sát Thi cử");
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(900, 650)); // Cửa sổ lớn hơn
-        setLocationRelativeTo(null); // Giữa màn hình
-        getContentPane().setBackground(new Color(245, 245, 245)); // Nền xám nhạt
-        setLayout(new BorderLayout(20, 20)); // Bố cục chính
+        setMinimumSize(new Dimension(900, 650)); 
+        setLocationRelativeTo(null); 
+        getContentPane().setBackground(new Color(245, 245, 245));
+        setLayout(new BorderLayout(20, 20));
 
-        // --- 2. Tiêu đề (Phía Bắc) ---
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        titlePanel.setOpaque(false); // Trong suốt để lấy nền frame
+        titlePanel.setOpaque(false); 
         titlePanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 10, 0)); // Padding
 
         JLabel titleLabel = new JLabel("Chọn Vai Trò Của Bạn");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
-        titleLabel.setForeground(new Color(50, 50, 50)); // Màu chữ đậm
+        titleLabel.setForeground(new Color(50, 50, 50)); 
         titlePanel.add(titleLabel);
 
         add(titlePanel, BorderLayout.NORTH);
@@ -162,8 +157,6 @@ public class Home extends javax.swing.JFrame {
         return card;
     }
 
-    // --- Các hàm xử lý sự kiện ---
-    
     private void giaovienActionPerformed() {
         new Login().setVisible(true);
         this.dispose();

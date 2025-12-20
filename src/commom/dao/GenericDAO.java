@@ -6,6 +6,7 @@ import java.util.List;
 import Server.Utils.DBHelper;
 import Server.Utils.RowMapper;
 
+//Hàm DAO tổng quát
 public class GenericDAO<T> {
 	private final RowMapper<T> rowMapper;
 

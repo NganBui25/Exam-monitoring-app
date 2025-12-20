@@ -2,6 +2,7 @@ package Client.Controller.Teacher;
 
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.Socket;
@@ -111,7 +112,6 @@ public class TeacherController extends InContestBaseController{
 	        try (java.net.Socket uploadSocket = new java.net.Socket(Client.Constant.serverAddress, Client.Constant.tcpPort);
 	             java.io.DataOutputStream dos = new java.io.DataOutputStream(uploadSocket.getOutputStream())) {
 
-	            // 1. Gửi lệnh U + RoomID (roomId lấy từ biến của controller)
 	            dos.writeUTF("A" + roomId);
 
 	            // 2. Gửi thông tin file
@@ -119,9 +119,10 @@ public class TeacherController extends InContestBaseController{
 	            dos.writeLong(file.length());
 
 	            // 3. Gửi nội dung file
-	            try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
+	            try (FileInputStream fis = new FileInputStream(file)) {
 	                byte[] buffer = new byte[4096];
 	                int read;
+	                //Gửi từng gói qua mạng
 	                while ((read = fis.read(buffer)) != -1) {
 	                    dos.write(buffer, 0, read);
 	                }
@@ -135,5 +136,18 @@ public class TeacherController extends InContestBaseController{
 	        }
 	    }).start();
 	}
-	
+
+	public void sendLockSignal(boolean isLock) {
+		try (Socket tcpSocket = new Socket(Constant.serverAddress, Constant.tcpPort);
+	            DataOutputStream dos = new DataOutputStream(tcpSocket.getOutputStream())) {
+	        if(isLock) {
+	        	dos.writeUTF("Z" + " " + roomId);
+	        }
+	        else {
+	        	dos.writeUTF("O" + " " + roomId);
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
 }

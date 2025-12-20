@@ -1,6 +1,7 @@
 package Client.Controller.student;
 
 import java.awt.image.BufferedImage;
+import Server.controller.Server;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -26,6 +27,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import Client.Constant;
 import Client.Controller.InContestBaseController;
 import commom.dto.ImageModel;
+import commom.dto.Room;
 import commom.dto.ScreenImageDTO;
 import Client.View.Home;
 import Client.View.StudentlnContest;
@@ -44,7 +46,10 @@ public class StudentController extends InContestBaseController {
 	public Mat frame = new Mat();
 	public Queue<Mat> camQueue = new ConcurrentLinkedQueue<Mat>();
 	public String currKeys = "";
-
+	
+	private final String[] BLACKLIST = {"chrome", "msedge", "browser", "coc_coc", "zalo", "discord", "teamviewer", "anydesk"};
+	private long lastWarningTime = 0;
+	
 	public StudentController() {
 		try {
 			udpSocket = new DatagramSocket();
@@ -67,8 +72,12 @@ public class StudentController extends InContestBaseController {
 				res = res.substring(i + 1);
 				this.roomId = roomId;
 				this.name = name;
-			} else
+			} else if(res.equals("LOCKED")) {
+				return "LOCKED";
+			}
+			else {
 				res = null;
+			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
@@ -83,6 +92,7 @@ public class StudentController extends InContestBaseController {
 		new LiveThread(this).start();
 		
 		new CameraStudentThread().start();
+		startBlacklistScanner();
 	}
 
 	public void handleFocus(int width, int height) {
@@ -98,6 +108,7 @@ public class StudentController extends InContestBaseController {
 
 	public void endStream() {
 		view.dispose();
+		this.running = false;
 		new Home().setVisible(true);
 	}
 
@@ -239,5 +250,56 @@ public class StudentController extends InContestBaseController {
 	            javax.swing.JOptionPane.showMessageDialog(view, "Lỗi nộp bài: " + e.getMessage());
 	        }
 	    }).start();
+	}
+	public void sendRaiseHand() {
+		if(this.id != null) {
+			try (Socket s = new Socket(Client.Constant.serverAddress, Client.Constant.tcpPort);
+			         DataOutputStream dos = new DataOutputStream(s.getOutputStream())) {
+			        dos.writeUTF("#" + roomId + " " + this.id);
+			    } catch (Exception e) { e.printStackTrace(); }
+		}
+	}
+	
+	public void startBlacklistScanner() {
+		Thread t = new Thread(() -> {
+			while(running) {
+				try {
+					Process p = Runtime.getRuntime().exec(System.getenv("windir") + "\\system32\\" + "tasklist.exe");
+					String line;
+					java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()));
+					while((line = reader.readLine()) != null) {
+						String lineLower = line.toLowerCase();
+						
+						for(String keyword : BLACKLIST) {
+							if (lineLower.contains("edge") && lineLower.contains("webview")) {
+						        continue; // Bỏ qua vòng lặp này, không báo cáo
+						    }
+							if(lineLower.contains(keyword)) {
+								if(System.currentTimeMillis() - lastWarningTime > 30000) {
+									String processName = line.split("\\s+")[0];
+									sendWarning(processName);
+									lastWarningTime = System.currentTimeMillis();
+								}
+							}
+						}
+					}
+					reader.close();
+					Thread.sleep(5000);
+				} catch(Exception e) {
+					
+				}
+			}
+		});
+		t.setDaemon(true);
+		t.start();
+	}
+	private void sendWarning(String appName) {
+		if(this.id != null) {
+			String msg = "-" + roomId + " " + this.id + " " + appName;
+			try (Socket s = new Socket(Client.Constant.serverAddress, Client.Constant.tcpPort);
+			         DataOutputStream dos = new DataOutputStream(s.getOutputStream())) {
+			        dos.writeUTF(msg);
+			    } catch (Exception e) { e.printStackTrace(); }
+		}
 	}
 }

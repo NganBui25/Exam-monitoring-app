@@ -30,7 +30,6 @@ public class ViewThread extends Thread {
 						par.viewList.set(i, null);
 						byte[] completeData = assemblePackets(tmp.getData());
 						par.setImage(completeData, i);
-						System.out.println(System.nanoTime() - start);
 					}
 				}
 				try {

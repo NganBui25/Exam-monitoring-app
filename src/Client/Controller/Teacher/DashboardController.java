@@ -1,5 +1,6 @@
 package Client.Controller.Teacher;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.DatagramSocket;
@@ -7,6 +8,8 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.SwingUtilities;
 
 import Client.Constant;
 import commom.model.Participant;
@@ -144,47 +147,86 @@ public class DashboardController {
 			ex.printStackTrace();
 		}
 	}
-	public void downloadStudentSubmission(int participantId) {
-	    new Thread(() -> {
-	        try (java.net.Socket tcpSocket = new java.net.Socket(Client.Constant.serverAddress, Client.Constant.tcpPort);
-	             java.io.DataOutputStream dos = new java.io.DataOutputStream(tcpSocket.getOutputStream());
-	             java.io.DataInputStream dis = new java.io.DataInputStream(tcpSocket.getInputStream())) {
-	            
-	            // Gửi lệnh A (Answer) + ID sinh viên
-	            dos.writeUTF("I" + participantId);
-	            
-	            String status = dis.readUTF();
-	            if ("OK".equals(status)) {
-	                String fileName = dis.readUTF();
-	                long fileSize = dis.readLong();
-	                
-	                // Chọn nơi lưu
-	                javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
-	                fileChooser.setSelectedFile(new java.io.File(fileName));
-	                
-	                if (fileChooser.showSaveDialog(view) == javax.swing.JFileChooser.APPROVE_OPTION) {
-	                    java.io.File saveFile = fileChooser.getSelectedFile();
-	                    
-	                    try (java.io.FileOutputStream fos = new java.io.FileOutputStream(saveFile)) {
-	                        byte[] buffer = new byte[4096];
-	                        long totalRead = 0;
-	                        int read;
-	                        while (totalRead < fileSize && (read = dis.read(buffer, 0, (int)Math.min(buffer.length, fileSize - totalRead))) != -1) {
-	                            fos.write(buffer, 0, read);
-	                            totalRead += read;
-	                        }
-	                    }
-	                    javax.swing.JOptionPane.showMessageDialog(view, "Tải bài làm thành công!");
-	                    java.awt.Desktop.getDesktop().open(saveFile);
-	                }
-	            } else {
-	                javax.swing.JOptionPane.showMessageDialog(view, "Sinh viên này chưa nộp bài!", "Thông báo", javax.swing.JOptionPane.WARNING_MESSAGE);
-	            }
-	            
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	            javax.swing.JOptionPane.showMessageDialog(view, "Lỗi tải bài: " + e.getMessage());
-	        }
-	    }).start();
+//	public void downloadStudentSubmission(int participantId) {
+//	    new Thread(() -> {
+//	        try (java.net.Socket tcpSocket = new java.net.Socket(Client.Constant.serverAddress, Client.Constant.tcpPort);
+//	             java.io.DataOutputStream dos = new java.io.DataOutputStream(tcpSocket.getOutputStream());
+//	             java.io.DataInputStream dis = new java.io.DataInputStream(tcpSocket.getInputStream())) {
+//	            
+//	            // Gửi lệnh A (Answer) + ID sinh viên
+//	            dos.writeUTF("I" + participantId);
+//	            
+//	            String status = dis.readUTF();
+//	            if ("OK".equals(status)) {
+//	                String fileName = dis.readUTF();
+//	                long fileSize = dis.readLong();
+//	                
+//	                // Chọn nơi lưu
+//	                javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+//	                fileChooser.setSelectedFile(new java.io.File(fileName));
+//	                
+//	                if (fileChooser.showSaveDialog(view) == javax.swing.JFileChooser.APPROVE_OPTION) {
+//	                    java.io.File saveFile = fileChooser.getSelectedFile();
+//	                    
+//	                    try (java.io.FileOutputStream fos = new java.io.FileOutputStream(saveFile)) {
+//	                        byte[] buffer = new byte[4096];
+//	                        long totalRead = 0;
+//	                        int read;
+//	                        while (totalRead < fileSize && (read = dis.read(buffer, 0, (int)Math.min(buffer.length, fileSize - totalRead))) != -1) {
+//	                            fos.write(buffer, 0, read);
+//	                            totalRead += read;
+//	                        }
+//	                    }
+//	                    javax.swing.JOptionPane.showMessageDialog(view, "Tải bài làm thành công!");
+//	                    java.awt.Desktop.getDesktop().open(saveFile);
+//	                }
+//	            } else {
+//	                javax.swing.JOptionPane.showMessageDialog(view, "Sinh viên này chưa nộp bài!", "Thông báo", javax.swing.JOptionPane.WARNING_MESSAGE);
+//	            }
+//	            
+//	        } catch (Exception e) {
+//	            e.printStackTrace();
+//	            javax.swing.JOptionPane.showMessageDialog(view, "Lỗi tải bài: " + e.getMessage());
+//	        }
+//	    }).start();
+//	}
+	
+	public void previewStudentSubmission(int participantId) {
+		new Thread(() -> {
+            try (Socket tcpSocket = new Socket(Constant.serverAddress, Constant.tcpPort);
+                 DataOutputStream dos = new DataOutputStream(tcpSocket.getOutputStream());
+                 DataInputStream dis = new DataInputStream(tcpSocket.getInputStream())) {
+            	dos.writeUTF("I" + participantId);
+            	String res = dis.readUTF();
+            	if("OK".equals(res)) {
+            		String fileName = dis.readUTF();
+            		long fileSize = dis.readLong();
+            		
+            		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            		byte[] buffer = new byte[4096];
+            		long totalRead = 0;
+                    int read;
+                    while (totalRead < fileSize && (read = dis.read(buffer, 0, (int)Math.min(buffer.length, fileSize - totalRead))) != -1) {
+                        baos.write(buffer, 0, read);
+                        totalRead += read;
+                    }
+                    
+                    byte[] fileData = baos.toByteArray();
+                    
+                    SwingUtilities.invokeLater(() -> {
+                    	view.showSubmissionDialog(fileName, fileData);
+                    });
+            	} else {
+            		SwingUtilities.invokeLater(() -> {
+                        Service.showAlert("Sinh viên này chưa nộp bài!", "Thông báo");
+                   });
+            	}
+            } catch(Exception e) {
+            	e.printStackTrace();
+                SwingUtilities.invokeLater(() -> {
+                    Service.showAlert("Lỗi tải bài: " + e.getMessage(), "Lỗi");
+                });
+            }
+		}).start();
 	}
 }

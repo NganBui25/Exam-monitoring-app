@@ -51,7 +51,8 @@ public class LiveThread extends Thread {
 							isFocusScreen = false;
 							par.handleFocus(Constant.NORMAL_WIDTH, Constant.NORMAL_HEIGHT);
 						}
-						isFocusCam = true;						par.camDim = new Size(Constant.FOCUS_WIDTH, Constant.FOCUS_HEIGHT);
+						isFocusCam = true;					
+						par.camDim = new Size(Constant.FOCUS_WIDTH, Constant.FOCUS_HEIGHT);
 					} else if (msg.startsWith("~H")) {
 						if (isFocusScreen) {
 							isFocusScreen = false;

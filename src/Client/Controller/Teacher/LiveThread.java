@@ -4,6 +4,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import javax.swing.SwingUtilities;
+
 import Client.Constant;
 
 public class LiveThread extends Thread {
@@ -36,6 +38,29 @@ public class LiveThread extends Thread {
 						msgNum++;
 					} else if (msg.startsWith("K")) {
 						par.addKeyLog(msg.substring(1));
+					} else if(msg.startsWith("F")) {
+						String[] parts = msg.split(" ");
+						int dbId = Integer.parseInt(parts[1]);
+						int studentNum = Integer.parseInt(parts[2]);
+						SwingUtilities.invokeLater(() -> {
+                            String studentName = par.view.getStudentNameByNum(studentNum);
+                            System.out.println("Nhận nộp bài: " + studentName + " (Cam số " + studentNum + ")");
+                            par.view.addSubmittedStudent(studentNum, studentName);
+                        });
+					} else if(msg.startsWith("HAND")) {
+						int studentNum = Integer.parseInt(msg.substring(5));
+						SwingUtilities.invokeLater(() -> {
+					        par.view.highlightHandRaised(studentNum);
+					    });
+					}
+					else if(msg.startsWith("WARN")) {
+						String[] parts = msg.split(" ");
+						int studentNum = Integer.parseInt(parts[1]);
+						String appName = parts[2];
+						
+						SwingUtilities.invokeLater(() -> {
+					        par.view.showStudentWarning(studentNum, appName);
+					    });
 					}
 				}
 			} catch (IOException e) {

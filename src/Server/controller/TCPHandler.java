@@ -3,6 +3,7 @@ package Server.controller;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -123,6 +124,17 @@ public class TCPHandler implements Runnable {
 			case 'I':
 				sendStudentSubmission(message.substring(1), output);
 			    break;
+			case 'Z': //Khóa phòng
+				handleLockRoom(message, true);
+				break;
+			case 'O': //Mở phòng
+				handleLockRoom(message, false);
+			case '#':
+				handleRaiseHand(message);
+				break;
+			case '-':
+				handleWarningGianLan(message);
+				break;
 			default:
 				break;
 			}
@@ -135,6 +147,63 @@ public class TCPHandler implements Runnable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private void handleWarningGianLan(String message) {
+		try {
+			int firstSpace = message.indexOf(" ");
+			int roomId = Integer.parseInt(message.substring(1, firstSpace));
+			
+			String remaining = message.substring(firstSpace + 1);
+			int secondSpace = remaining.indexOf(" ");
+			int studentDbId = Integer.parseInt(remaining.substring(0, secondSpace));
+			String appName = remaining.substring(secondSpace + 1);
+			
+			Room room = Server.rooms.get(roomId);
+			if(room != null) {
+				ClientModel student = room.getStudents().get(studentDbId);
+				if(student != null) {
+					int studentNum = student.getStudentNum();
+					
+					String warnMsg = "WARN " + studentNum + " " + appName;
+					room.getWarnings().add(warnMsg);
+					System.out.println("Cảnh báo: SV " + studentDbId + " dùng " + appName);
+				}
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void handleRaiseHand(String msg) {
+	    try {
+	        String[] parts = msg.split(" ");
+	        int roomId = Integer.parseInt(parts[0].substring(1)); 
+	        int studentDbId = Integer.parseInt(parts[1]);
+
+	        Room room = Server.rooms.get(roomId);
+	        if (room != null) {
+	            ClientModel student = room.getStudents().get(studentDbId);
+	            if (student != null) {
+	                int studentNum = student.getStudentNum();
+	                room.getRaisedHands().add(studentNum);
+	                System.out.println("Sinh viên " + studentDbId + " (Cam số " + studentNum + ") giơ tay.");
+	            }
+	        }
+	    } catch (Exception e) { e.printStackTrace(); }
+	}
+
+	private void handleLockRoom(String message, boolean b) {
+		try {
+			int roomId = Integer.parseInt(message.substring(1).trim());
+			Room room = Server.rooms.get(roomId);
+			if(room != null) {
+				room.setLocked(b);
+				System.out.println("Phòng " + roomId + " trạng thái khóa: " + b);
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -164,7 +233,14 @@ public class TCPHandler implements Runnable {
 	                totalRead += read;
 	            }
 	        }
-	        System.out.println("Sinh viên " + participantId + " đã nộp bài: " + fileName);
+	        int pId = Integer.parseInt(participantId);
+	        for(Room r : Server.rooms.values()) {
+	        	if(r.getStudents().containsKey(pId)) {
+	        		r.getNewSubmissions().add(pId);
+	        		System.out.println("Đã thêm sinh viên " + pId + " vào danh sách nộp bài");
+	        		break;
+	        	}
+	        }
 	        
 	    } catch (IOException e) {
 	        e.printStackTrace();
@@ -205,7 +281,7 @@ public class TCPHandler implements Runnable {
 
 	private void receiveExamFile(String substring, DataInputStream input) {
 		try {
-			String fileName = input.readUTF();
+			String fileName = input.readUTF(); 
 			long fileSize = input.readLong();
 			String folderPath = Constant.FILE_LOCATION + File.separator + "Test" + File.separator + substring + File.separator;
 	        File folder = new File(folderPath);
@@ -213,13 +289,14 @@ public class TCPHandler implements Runnable {
 	        
 	        // 3. Tạo file trên ổ cứng Server
 	        File file = new File(folderPath + fileName);
-	        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+	        try (FileOutputStream fos = new FileOutputStream(file)) {
 	            byte[] buffer = new byte[4096];
-	            long totalRead = 0;
-	            int read;
+	            long totalRead = 0; //Đã nhận được bao nhiêu byte rồi
+	            int read; //Đọc được bao nhiêu byte
 	            // Vòng lặp đọc byte từ mạng và ghi xuống file
+	            //min(...): tức là nếu như gói dữ liệu cuối còn 4000 thì nó sẽ đọc 4000, nó sẽ không cố đọc 4096 làm hỏng file
 	            while (totalRead < fileSize && (read = input.read(buffer, 0, (int)Math.min(buffer.length, fileSize - totalRead))) != -1) {
-	                fos.write(buffer, 0, read);
+	                fos.write(buffer, 0, read); //ghi dữ liệu vào ổ cứng
 	                totalRead += read;
 	            }
 	        }
@@ -314,15 +391,19 @@ public class TCPHandler implements Runnable {
 		int roomId = Integer.valueOf(msg.substring(1, i));
 		Room room = Server.rooms.get(roomId);
 		if (room != null) {
-			String name = msg.substring(j + 1);
-			int studentId = ParticipantDAO.addParticipant(roomId, name);
-			int studentNum = room.getNewStudentId().getAndIncrement();
-			room.getStudentNums().put(address.toString() + msg.substring(i + 1, j), studentNum);
-			room.getStudents().put(studentId, new ClientModel(studentNum));
-			room.getForFocus().put(studentNum * 2, studentId * 2);
-			room.getForFocus().put(studentNum * 2 + 1, studentId * 2 + 1);
-			room.getNames().add(Map.entry(studentNum, msg.substring(j + 1)));
-			output.writeUTF("Y" + studentId + " " + room.getTeachername());
+			if(room.getIsLocked() == true) {
+				output.writeUTF("LOCKED");
+			} else {
+				String name = msg.substring(j + 1);
+				int studentId = ParticipantDAO.addParticipant(roomId, name);
+				int studentNum = room.getNewStudentId().getAndIncrement();
+				room.getStudentNums().put(address.toString() + msg.substring(i + 1, j), studentNum);
+				room.getStudents().put(studentId, new ClientModel(studentNum));
+				room.getForFocus().put(studentNum * 2, studentId * 2);
+				room.getForFocus().put(studentNum * 2 + 1, studentId * 2 + 1);
+				room.getNames().add(Map.entry(studentNum, msg.substring(j + 1)));
+				output.writeUTF("Y" + studentId + " " + room.getTeachername());
+			}
 		} else
 			output.writeUTF("N");
 	}
@@ -397,7 +478,22 @@ public class TCPHandler implements Runnable {
 				Integer quit = room.getQuittedStudents().poll();
 				dos.writeUTF("D" + quit);
 			}
-
+			while(!room.getNewSubmissions().isEmpty()) {
+				Integer subId = room.getNewSubmissions().poll();
+				ClientModel student = room.getStudents().get(subId);
+				if(student != null) {
+					dos.writeUTF("F" + " " + subId + " " + student.getStudentNum());
+				}
+			}
+			while(!room.getRaisedHands().isEmpty()) {
+				Integer Num = room.getRaisedHands().poll();
+				dos.writeUTF("HAND " + Num);
+			}
+			while(!room.getWarnings().isEmpty()) {
+				String w = room.getWarnings().poll();
+				dos.writeUTF(w);
+				System.out.println("Ở cảnh báo giáo viên");
+			}
 			ArrayList<String> chatHistory = room.getChatHistory();
 			while (msgNum < chatHistory.size()) {
 				dos.writeUTF("M" + chatHistory.get(msgNum));
@@ -460,6 +556,10 @@ public class TCPHandler implements Runnable {
 		String user_id = splitMsg[1];
 		List<Test> listData = TestDAO.listTests(user_id);
 		StringBuilder sendMsg = new StringBuilder();
+		/*StringBuilder: là 1 class kế thừa từ AbstractStringBuilder
+		AbstractStringBuilder: có 1 thuộc tính là value (khong final)
+		StringBuilder có phương thức append (str)=> cộng dồn str vào value ở class cha
+		*/
 		if (!listData.isEmpty()) {
 			for (int i = 0; i < listData.size(); i++) {
 				Test t = listData.get(i);
