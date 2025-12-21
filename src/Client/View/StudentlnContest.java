@@ -249,13 +249,11 @@ public class StudentlnContest extends JFrame implements NativeKeyListener {
 
     private void startCapture() {
         try {
-            // Đăng ký Keylog
             if (!GlobalScreen.isNativeHookRegistered()) {
                 GlobalScreen.registerNativeHook();
             }
             GlobalScreen.addNativeKeyListener(this);
             
-            // Bắt đầu gửi Video/Heartbeat
             controller.startThreads();
         } catch (Exception ex) {
             ex.printStackTrace();

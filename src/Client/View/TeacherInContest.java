@@ -388,14 +388,14 @@ public class TeacherInContest extends JFrame {
     }
     
     public void highlightHandRaised(int studentNum) {
-    	int panelIdx = studentNum * 2;
+    	int panelIdx = studentNum * 2 + 1;
     	if(panelIdx < cameraPanels.size()) {
     		CameraPanel panel = cameraPanels.get(panelIdx);
     		
     		panel.setBorder(new LineBorder(Color.YELLOW, 5));
     		
     		java.awt.Toolkit.getDefaultToolkit().beep();
-    		addText("Hệ thống: Sinh viên " + panel.getNameText() + " đang giơ tay!");
+    		addText("Hệ thống: Sinh viên " + panel.getNameText() + " đang giơ tay!" + "\n");
     	}
     }
     
@@ -404,7 +404,7 @@ public class TeacherInContest extends JFrame {
     	
     	addText("⚠️ CẢNH BÁO: " + studentName + " đang mở " + appName.toUpperCase() + "!" + "\n");
     	
-    	int panelIdx = studentNum*2;
+    	int panelIdx = studentNum*2 + 1;
     	if(panelIdx < cameraPanels.size()) {
     		CameraPanel panel = cameraPanels.get(panelIdx);
     		

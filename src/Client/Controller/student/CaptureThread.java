@@ -42,7 +42,6 @@ public class CaptureThread extends Thread {
 		while (par.running) {
 			ScreenImageDTO tmp = par.imgModel;
 			BufferedImage fullImage = r.createScreenCapture(capture);
-			par.screenQueue.add(fullImage);
 			tmp.g2d.drawImage(fullImage, 0, 0, tmp.img.getWidth(), tmp.img.getHeight(), null);
 		}
 	}

@@ -207,22 +207,19 @@ public class TCPHandler implements Runnable {
 		}
 	}
 
-	// Hàm 1: Nhận bài làm từ sinh viên
+	// Nhận bài làm từ sinh viên
 	private void receiveSubmission(String participantId, DataInputStream input) {
 	    try {
 	        String fileName = input.readUTF();
 	        long fileSize = input.readLong();
 	        
-	        // Tạo thư mục riêng cho từng sinh viên: Data/Submissions/[ID]/
 	        String folderPath = Constant.FILE_LOCATION + File.separator + "Submissions" + File.separator + participantId + File.separator;
 	        File folder = new File(folderPath);
 	        if (!folder.exists()) folder.mkdirs();
 	        
-	        // Xóa bài cũ nếu nộp lại (để chỉ giữ 1 bài mới nhất)
 	        File[] oldFiles = folder.listFiles();
 	        if(oldFiles != null) for(File f : oldFiles) f.delete();
 
-	        // Lưu file
 	        File file = new File(folderPath + fileName);
 	        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
 	            byte[] buffer = new byte[4096];
@@ -247,7 +244,7 @@ public class TCPHandler implements Runnable {
 	    }
 	}
 
-	// Hàm 2: Gửi bài làm cho giáo viên
+	//Gửi bài làm cho giáo viên
 	private void sendStudentSubmission(String participantId, DataOutputStream output) {
 	    try {
 	        String folderPath = Constant.FILE_LOCATION + File.separator + "Submissions" + File.separator + participantId + File.separator;
@@ -255,7 +252,7 @@ public class TCPHandler implements Runnable {
 	        File[] files = folder.listFiles();
 	        
 	        if (files != null && files.length > 0) {
-	            File file = files[0]; // Lấy file bài làm
+	            File file = files[0]; 
 	            
 	            output.writeUTF("OK");
 	            output.writeUTF(file.getName());
@@ -270,7 +267,7 @@ public class TCPHandler implements Runnable {
 	            }
 	            output.flush();
 	        } else {
-	            output.writeUTF("NO_FILE"); // Sinh viên này chưa nộp bài
+	            output.writeUTF("NO_FILE"); 
 	        }
 	    } catch (IOException e) {
 	        e.printStackTrace();

@@ -3,8 +3,10 @@ package Client.Controller.student;
 import java.awt.image.BufferedImage;
 import Server.controller.Server;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -47,7 +49,7 @@ public class StudentController extends InContestBaseController {
 	public Queue<Mat> camQueue = new ConcurrentLinkedQueue<Mat>();
 	public String currKeys = "";
 	
-	private final String[] BLACKLIST = {"chrome", "msedge", "browser", "coc_coc", "zalo", "discord", "teamviewer", "anydesk"};
+	private final String[] BLACKLIST = {"chrome", "browser", "coc_coc", "zalo", "discord", "teamviewer", "anydesk"};
 	private long lastWarningTime = 0;
 	
 	public StudentController() {
@@ -167,18 +169,14 @@ public class StudentController extends InContestBaseController {
 	             java.io.DataOutputStream dos = new java.io.DataOutputStream(tcpSocket.getOutputStream());
 	             java.io.DataInputStream dis = new java.io.DataInputStream(tcpSocket.getInputStream())) {
 	            
-	            // 1. Gửi lệnh G + RoomID (roomId là biến có sẵn trong controller)
 	            dos.writeUTF("G" + roomId);
-	            
-	            // 2. Nhận phản hồi từ Server
+
 	            String status = dis.readUTF();
 	            
 	            if ("OK".equals(status)) {
-	                // 3. Đọc thông tin file
 	                String fileName = dis.readUTF();
 	                long fileSize = dis.readLong();
 	                
-	                // 4. Mở hộp thoại để sinh viên chọn nơi lưu
 	                javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
 	                fileChooser.setSelectedFile(new java.io.File(fileName)); // Gợi ý tên file gốc
 	                fileChooser.setDialogTitle("Chọn nơi lưu đề thi");
@@ -188,12 +186,10 @@ public class StudentController extends InContestBaseController {
 	                if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
 	                    java.io.File saveFile = fileChooser.getSelectedFile();
 	                    
-	                    // 5. Ghi file xuống ổ cứng
 	                    try (java.io.FileOutputStream fos = new java.io.FileOutputStream(saveFile)) {
 	                        byte[] buffer = new byte[4096];
 	                        long totalRead = 0;
 	                        int read;
-	                        // Đọc byte từ mạng ghi vào file
 	                        while (totalRead < fileSize && (read = dis.read(buffer, 0, (int)Math.min(buffer.length, fileSize - totalRead))) != -1) {
 	                            fos.write(buffer, 0, read);
 	                            totalRead += read;
@@ -204,13 +200,11 @@ public class StudentController extends InContestBaseController {
 	                        "Tải đề thi thành công!\nLưu tại: " + saveFile.getAbsolutePath(), 
 	                        "Thành công", javax.swing.JOptionPane.INFORMATION_MESSAGE);
 	                        
-	                    // Tùy chọn: Tự động mở file sau khi tải
 	                    try {
 	                        java.awt.Desktop.getDesktop().open(saveFile);
-	                    } catch (Exception ex) { /* Không mở được thì thôi */ }
+	                    } catch (Exception ex) { }
 	                }
 	            } else {
-	                // Server trả về NO_FILE hoặc lỗi khác
 	                javax.swing.JOptionPane.showMessageDialog(view, 
 	                    "Giáo viên chưa upload đề thi nào cho phòng này!", 
 	                    "Thông báo", javax.swing.JOptionPane.WARNING_MESSAGE);
@@ -227,14 +221,11 @@ public class StudentController extends InContestBaseController {
 	        try (java.net.Socket tcpSocket = new java.net.Socket(Client.Constant.serverAddress, Client.Constant.tcpPort);
 	             java.io.DataOutputStream dos = new java.io.DataOutputStream(tcpSocket.getOutputStream())) {
 	            
-	            // Gửi lệnh N + ID (Giả sử biến 'id' trong controller là participant_id)
 	            dos.writeUTF("N" + id);
 	            
-	            // Gửi thông tin file
 	            dos.writeUTF(file.getName());
 	            dos.writeLong(file.length());
 	            
-	            // Gửi nội dung
 	            try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
 	                byte[] buffer = new byte[4096];
 	                int read;
@@ -264,15 +255,17 @@ public class StudentController extends InContestBaseController {
 		Thread t = new Thread(() -> {
 			while(running) {
 				try {
+					//Process là đối tượng giúp java "nói chuyện", đọc kết quả, hoặc ra lệnh tắt/bật cho các phần mềm khác đang chạy trên máy tính (.exe, .sh)
 					Process p = Runtime.getRuntime().exec(System.getenv("windir") + "\\system32\\" + "tasklist.exe");
 					String line;
-					java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()));
+					BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+					//Sử dụng BufferedReader để đọc từng dòng kết quả mà tasklist trả về
 					while((line = reader.readLine()) != null) {
 						String lineLower = line.toLowerCase();
 						
 						for(String keyword : BLACKLIST) {
 							if (lineLower.contains("edge") && lineLower.contains("webview")) {
-						        continue; // Bỏ qua vòng lặp này, không báo cáo
+						        continue; 
 						    }
 							if(lineLower.contains(keyword)) {
 								if(System.currentTimeMillis() - lastWarningTime > 30000) {

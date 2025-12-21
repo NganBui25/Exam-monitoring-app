@@ -107,22 +107,18 @@ public class TeacherController extends InContestBaseController{
 	}
 	
 	public void uploadExamFile(File file) {
-	    // Chạy trong Thread mới để không làm đơ giao diện khi đang upload file nặng
 	    new Thread(() -> {
 	        try (java.net.Socket uploadSocket = new java.net.Socket(Client.Constant.serverAddress, Client.Constant.tcpPort);
 	             java.io.DataOutputStream dos = new java.io.DataOutputStream(uploadSocket.getOutputStream())) {
 
 	            dos.writeUTF("A" + roomId);
 
-	            // 2. Gửi thông tin file
 	            dos.writeUTF(file.getName());
 	            dos.writeLong(file.length());
 
-	            // 3. Gửi nội dung file
 	            try (FileInputStream fis = new FileInputStream(file)) {
 	                byte[] buffer = new byte[4096];
 	                int read;
-	                //Gửi từng gói qua mạng
 	                while ((read = fis.read(buffer)) != -1) {
 	                    dos.write(buffer, 0, read);
 	                }
