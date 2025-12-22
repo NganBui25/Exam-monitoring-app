@@ -13,7 +13,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.Socket;
+import java.util.HashSet;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.imageio.ImageIO;
@@ -49,7 +51,7 @@ public class StudentController extends InContestBaseController {
 	public Queue<Mat> camQueue = new ConcurrentLinkedQueue<Mat>();
 	public String currKeys = "";
 	
-	private final String[] BLACKLIST = {"chrome", "browser", "coc_coc", "zalo", "discord", "teamviewer", "anydesk"};
+	private final String[] BLACKLIST = {"chrome", "browser", "coccoc", "firefox", "zalo", "discord", "teamviewer", "anydesk", "ultraviewer", "edge"};
 	private long lastWarningTime = 0;
 	
 	public StudentController() {
@@ -253,38 +255,99 @@ public class StudentController extends InContestBaseController {
 	
 	public void startBlacklistScanner() {
 		Thread t = new Thread(() -> {
-			while(running) {
+			System.out.println("Bắt đầu quét process...");
+			while (running) {
 				try {
-					//Process là đối tượng giúp java "nói chuyện", đọc kết quả, hoặc ra lệnh tắt/bật cho các phần mềm khác đang chạy trên máy tính (.exe, .sh)
-					Process p = Runtime.getRuntime().exec(System.getenv("windir") + "\\system32\\" + "tasklist.exe");
-					String line;
-					BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-					//Sử dụng BufferedReader để đọc từng dòng kết quả mà tasklist trả về
-					while((line = reader.readLine()) != null) {
-						String lineLower = line.toLowerCase();
-						
-						for(String keyword : BLACKLIST) {
-							if (lineLower.contains("edge") && lineLower.contains("webview")) {
-						        continue; 
-						    }
-							if(lineLower.contains(keyword)) {
-								if(System.currentTimeMillis() - lastWarningTime > 30000) {
-									String processName = line.split("\\s+")[0];
-									sendWarning(processName);
-									lastWarningTime = System.currentTimeMillis();
-								}
-							}
-						}
-					}
-					reader.close();
-					Thread.sleep(5000);
-				} catch(Exception e) {
+					// Gọi hàm quét và diệt
+					scanAndKill();
 					
+					// Nghỉ 5 giây rồi quét tiếp
+					Thread.sleep(5000);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		});
 		t.setDaemon(true);
 		t.start();
+	}
+
+	// Hàm riêng thực hiện logic quét và diệt
+	private void scanAndKill() {
+		try {
+			// Sử dụng /fo csv /nh để lấy định dạng CSV, dễ tách tên hơn
+			Process p = Runtime.getRuntime().exec(System.getenv("windir") + "\\system32\\tasklist.exe /fo csv /nh");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			String line;
+			
+			Set<String> detectedApps = new HashSet<>();
+
+			while ((line = reader.readLine()) != null) {
+				if(line.trim().isEmpty()) continue;
+				
+				// Line dạng: "chrome.exe","1234","Console",...
+				// Tách lấy phần tử đầu tiên là tên
+				String[] parts = line.split(",");
+				String processName = parts[0].replace("\"", "").trim(); // Bỏ dấu ngoặc kép -> chrome.exe
+				String processNameLower = processName.toLowerCase();
+
+				for (String keyword : BLACKLIST) {
+					// Bỏ qua Edge WebView (Tiến trình hệ thống của Window)
+					if (processNameLower.contains("edge") && line.toLowerCase().contains("webview")) {
+						continue;
+					}
+					if (processNameLower.contains("crashhandler") || processNameLower.contains("service")) {
+				        continue; 
+				    }
+
+					// Nếu tên process chứa từ khóa cấm (ví dụ "chrome.exe" chứa "chrome")
+					if (processNameLower.contains(keyword)) {
+						// 1. DIỆT NGAY LẬP TỨC
+						killProcess(processName);
+						
+						// 2. Thêm vào danh sách đã diệt để tí nữa báo cáo
+						detectedApps.add(processName);
+					}
+				}
+			}
+			reader.close();
+
+			// Nếu có diệt được thằng nào -> Gửi cảnh báo 1 lần
+			if (!detectedApps.isEmpty()) {
+				// Chỉ gửi cảnh báo nếu cách lần trước > 5 giây để tránh spam server
+				if(System.currentTimeMillis() - lastWarningTime > 5000) {
+					String msgList = String.join(", ", detectedApps);
+					System.out.println("Auto-Kill: " + msgList);
+					sendWarning(msgList); // Gửi về server
+					lastWarningTime = System.currentTimeMillis();
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// Hàm thực thi lệnh kill
+	public void killProcess(String processName) {
+		try {
+			String cmd = "taskkill /F /T /IM \"" + processName + "\"";
+	        
+	        Process p = Runtime.getRuntime().exec(cmd);
+	        BufferedReader errorReader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+	        String line;
+	        while ((line = errorReader.readLine()) != null) {
+	            // Chỉ in ra nếu có lỗi thực sự
+	            if(!line.trim().isEmpty()) {
+	                System.err.println("Kill Error (" + processName + "): " + line);
+	            }
+	        }
+	        
+	        // Đợi lệnh chạy xong để chắc chắn
+	        p.waitFor();
+		} catch (Exception e) {
+			// Không in stacktrace để tránh rác console nếu không kill được
+		}
 	}
 	private void sendWarning(String appName) {
 		if(this.id != null) {

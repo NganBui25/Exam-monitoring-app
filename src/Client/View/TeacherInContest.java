@@ -379,7 +379,7 @@ public class TeacherInContest extends JFrame {
                 int dotIndex = fullName.indexOf(".");
                 int bracketIndex = fullName.lastIndexOf("[");
                 if (dotIndex != -1 && bracketIndex != -1) {
-                	System.out.println("Tên sinh viên: " + fullName);
+//                	System.out.println("Tên sinh viên: " + fullName);
                     return fullName.substring(dotIndex+1, bracketIndex);
                 }
             } catch (Exception e) { return "Sinh viên " + studentNum; }
