@@ -6,5 +6,9 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="F:/onnxruntime-1.22.0.jar"/>
+	<classpathentry kind="lib" path="F:/opencv-490.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ADMIN/Downloads/jnativehook-2.2.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ADMIN/Downloads/mysql-connector-java.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
